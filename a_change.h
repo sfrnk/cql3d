@@ -9,7 +9,7 @@ c
 c***********************************************************************
 
 c[332] version="cql3d_git_200101.3"  Submitted to github.com/compxco
-
+c[332]
 
 c[332] Added control of printout to the screen, 
     using the namelist variable ioutput(1) [it was present but not used].
