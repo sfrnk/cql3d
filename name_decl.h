@@ -86,13 +86,16 @@ c.......................................................................
       real*8 mpwr,npwr,megy,negy,mtorloss,ntorloss,
      1  mpwrzeff,npwrzeff,mpwrvphi,npwrvphi,
      1  mpwrelec,npwrelec,mpwrxj,npwrxj
+     
+      real*8 zrelax,zrelax_exp
 
       common /readscal/
      1  xfac,xpctlwr,xpctmdl,xlwr,xmdl,xsinkm,
      1  yreset,ylower,yupper,
      1  mpwrzeff,npwrzeff,mpwrvphi,npwrvphi,mpwrxj,npwrxj,
      1  mpwrelec,npwrelec,
-     1  elecscal,enescal,zeffscal,vphiscal,tescal,tiscal,
+     1  elecscal,enescal,zeffscal,zrelax,zrelax_exp,
+     &  vphiscal,tescal,tiscal,
      1  bctimescal,bctshift
 c..................................................................
 c     VECTOR DIMENSIONED NAMELIST SETUP COMMON BLOCK.....

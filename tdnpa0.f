@@ -903,7 +903,7 @@ c     iplt3d set in tdchief
       if (iplt3d.ne.0 .or. n.eq.0 .or. n.eq.nstop 
      +     .and. iplotnbi.eq.'yes') then
          call tdsxrplt(en_,eflux_npa,nen_npa,nenaa,
-     +        efluxt,nv_npa,inegsxr,softxry,lnwidth)
+     +        efluxt,nv_npa,inegsxr,softxry,npa_diag,lnwidth)
 
 c.......................................................................
 c     Plot NPA view cords in poloidal cross-section, if eqmod="enabled"

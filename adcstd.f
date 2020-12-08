@@ -3,8 +3,8 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER (I-N)
 C
-      Z1 = PA + PB * (1.0 + 1.0 / PCHI)
-      Z2 = PC - (PA + 2.0*PB + PB/PCHI)/PCHI
+      Z1 = PA + PB * (1.d0 + 1.d0 / PCHI)
+      Z2 = PC - (PA + 2.d0*PB + PB/PCHI)/PCHI
       Z3 = PD / PCHI
 
       ZCHISQ = PCHI * PCHI
@@ -17,10 +17,10 @@ C
      &         .03404*ZCHICB) / (1.0 + 2.197*PCHI +
      &         .2454*ZCHISQ + .002053*ZCHICB)
 
-      ADCFCHI = (3.0E13 / PCHI) * (Z1 + Z2 * ZALPHA + Z3 * ZBETA)
+      ADCFCHI = (3.0d13 / PCHI) * (Z1 + Z2 * ZALPHA + Z3 * ZBETA)
       RETURN
 
-      END
+      END FUNCTION ADCFCHI
 
 
 
@@ -37,7 +37,7 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER (I-N)
 
-      IF(PX.GE.1.) GO TO 2
+      IF(PX.GE.1.d0) GO TO 2
       IF(PX.GT.1.d-4) GO TO 1
 C
       ADCEXPE1 = DEXP(PX) * ( - DLOG(PX) - .57721566 + PX )
@@ -55,7 +55,7 @@ C
      &         (PX**2 + 3.330657*PX + 1.681534)
 C
       RETURN
-      END
+      END FUNCTION ADCEXPE1
 
 
 
@@ -72,10 +72,10 @@ C
       IMPLICIT INTEGER (I-N)
 
       IF( PX - PCHK ) 1 , 1 , 2
-    1 ADCEUND = 0.
+    1 ADCEUND = 0.d0
       RETURN
 C
     2 ADCEUND = DEXP(PX)
       RETURN
 C
-      END
+      END FUNCTION ADCEUND

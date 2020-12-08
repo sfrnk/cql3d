@@ -1,7 +1,8 @@
 c
 c
       subroutine tdsxrplt(en,eflux,nen,nenaa,
-     +                    efluxt,nv,inegsxr,softxry,lnwidth)
+     +                    efluxt,nv,inegsxr,softxry,npa_diag,lnwidth)
+      !Can be called by NPA or SXR routines
       implicit integer (i-n), real*8 (a-h,o-z)
       save
 
@@ -27,7 +28,7 @@ c..................................................................
 
       dimension en(nenaa),eflux(nenaa,*),efluxt(nv),inegsxr(nv)
       character*1024 t_
-      character*8 softxry
+      character*8 softxry,npa_diag ! Both are input args here
 
 c      write(*,*)'tdsxrplt: en(1:nen)',
 c     +     en(1:nen)
@@ -85,12 +86,15 @@ C     CALL PGENV(Rtam1(1),Rtam1(nen),Remin,Remax,0,20)
       CALL PGBOX('BCNST',R40,0,'BCNSTL',R40,0)
       CALL PGSAVE
       CALL PGSCH(R41P44)
-      if (softxry.eq.'enabled') then
-      CALL PGLAB('Photon Energy k (keV)', 
+      
+      if (softxry.ne."disabled") then
+        CALL PGLAB('Photon Energy k (keV)', 
      +     'd\u2\d\(0555)/dtdk (ergs/cm\u2\d-sec-ster-eV)',
      +     'SXR Energy Flux versus Photon Energy')
-      else
-      CALL PGLAB('Particle Energy k (keV)', 
+      endif
+      
+      if(npa_diag.ne."disabled")then 
+        CALL PGLAB('Particle Energy k (keV)', 
      +     'd\u2\dN/dtdk (#/cm\u2\d-sec-ster-eV)',
      +     'NPA Flux versus Energy')
       endif
@@ -116,9 +120,10 @@ c     +                            nn,j,eflux(j,nn),rtam2(j)
  
        CALL PGSLW(lnwidth) ! restore line thickness/width
 
-      if (softxry.eq.'enabled') then 
+      if (softxry.ne.'disabled') then 
          write(t_,610)
-      else
+      endif
+      if(npa_diag.ne."disabled")then
          write(t_,613)
       endif
  610  format("total flux, enmin to enmax (ergs/cm**2-sec-ster):")
@@ -206,10 +211,12 @@ c      write(*,*)'tdsxrvw: PGER1,PGERNNR=',PGER1,PGERNNR
       CALL PGBOX('BCNST',R40,0,'BCNST',R40,0)
       CALL PGSLW(lnwidth) ! line thickness/width
 
-      if (softxry.eq."enabled") then
+      if (softxry.ne."disabled") then
          CALL PGLAB('Major radius (cms)','Vert height (cms)',
      +        'Flux Surfaces and SXR Chords')
-      else  ! NPA
+      endif
+      
+      if(npa_diag.ne."disabled")then
          CALL PGLAB('Major radius (cms)','Vert height (cms)',
      +        'Flux Surfaces and NPA Chords')
       endif

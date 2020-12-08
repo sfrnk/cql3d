@@ -125,16 +125,20 @@ c..................................................................
          timet=timet+zdttot*dtreff
         ! n and time are not really updated yet - 
         ! n and time are updated after n_ and time_ are updated.
-CMPIINSERT_IF_RANK_EQ_MPIWORKER
-        call cfpgamma  !determine coulomb log...   But called 6 lines above?
 cBH131107:  NEED to check this n=0 issue.
+
+        !YuP[2020-11-15] Moved calls to cfpgamma and finit out of MPIWORKER,
+        ! and added it_ampf.eq.1 condition (= reuse values from 1st iteration)
+        if (it_ampf.eq.1) call cfpgamma  !determine coulomb log...   But called 6 lines above?
         ! Apply additional preloading to f, if n=nfpld
         ! (If only initial loading is used, then nfpld=0)
-        if (n.eq.nfpld) then
+        if (n.eq.nfpld .and. it_ampf.eq.1) then
                call finit
         endif
         ! Note: at n=0 finit is called from ainitial.
         ! First call to achiefn is with n=0, then advanced.
+        
+CMPIINSERT_IF_RANK_EQ_MPIWORKER
 
 !YuP[2020-02-11] no need in n.ne.1  if (n.ne.1 .and.(it_ampf.eq.1)) call sourcee !determine particle sources..(sourceko)
         if (it_ampf.eq.1) call sourcee !determine particle sources..(sourceko)

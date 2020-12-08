@@ -81,6 +81,11 @@ Set the default real type to an 8 byte wide type. Do nothing if this is
 already the default. This option also affects the kind of non-double real
 constants like 1.0, and does promote the default width of "DOUBLE PRECISION"
 to 16 bytes if possible, unless "-fdefault-double-8" is given, too.
+The -fdefault-real-8 option extends real*4 numbers to real*8 maintaining
+the accuracy of the stated real*4 number, in a predictable manner, rather
+than having random numbers in memory fill in the second half of the 
+real*4 number without this option. Without this option, individual
+runs often differ beyond the 3rd or 4th significant figure (BH).
 
 A related option in the Intel compiler should be used.
 
@@ -159,4 +164,73 @@ the diverse capabilites of this noncircular, multi-species,
 collisional-RF-quasilinear Fokker-Planck code.
 
  
+
+
+
+201027
+======
+In git/cql3d
+git remote -v
+==>
+origin	https://github.com/rwharvey/cql3d.git (fetch)
+origin	https://github.com/rwharvey/cql3d.git (push)
+[This could be the problem with pushing:  Why rwharvey/cql3d.git?]
+But, I want to be connected to github.com/compxco. 
+
+
+With great help from David Green, finally got cql3d github directory
+properly set up at github.com/compxco.   A search of github for cql3d
+gives that it is at:  rwharvey/cql3d, sshiraiwa/cql3d, and 
+garrettwrong/cql3d_f90.
+
+It must be that originally, for the local git/cql3d, I pulled cql3d
+down from 
+https://github.com/rwharvey/cql3d.git, 
+after somehow getting it there.  Or, is was put there from my
+git/cql3d/ directory.
+
+Present solution was to 
+(1) push the git/cql3d directory to github.com/rwharvey/cql3d
+(2) move local git/cql3d/ to git/cql3d_old_rwharvey/
+(3) delete the present cql3d/ from github.com/compxco,
+(4) re-install it at github.com/compxco as a fork from rwharvey/cql3d,
+(5) pull github.com/compxco/cql3d to my local git/ directory.
+
+Henceforth, we will update this new installation.
+
+Now, in git/cql3d/:
+git remote -v
+==> 
+origin	git@github.com:compxco/cql3d.git (fetch)
+origin	git@github.com:compxco/cql3d.git (push)
+
+Did test after making and committing a small change in a_change.h, then 
+git push -v   [-v, --verbose]  [-n, --dry-run]
+
+Reexecuting:
+git push -v -n
+==> 
+Pushing to git@github.com:compxco/cql3d.git
+X11 forwarding request failed on channel 0
+To git@github.com:compxco/cql3d.git
+ = [up to date]      master -> master
+Everything up-to-date
+
+
+201208
+======
+Staged and committed.
+Commit message:
+
+version="cql3d_git_201207.0"
+
+Fixed several bugs in ADC** subroutines.
+
+Adjusted plots related to SXR and NPA diagnostics.
+
+Modified iprozeff="curr_fit" procedure, which changes Zeff
+in such a way as to maintain the target current.
+Two new namelist variables are added: zrelax (default is 0.5d0)
+and zrelax_exp (default is 1.d0). The procedure is similar to 
+that used in efswtch.eq."method4". See cqlinput_help for description.
 

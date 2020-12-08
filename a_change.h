@@ -8,8 +8,35 @@ c     This file documents changes in the code
 c
 c***********************************************************************
 
-c[332] version="cql3d_git_200101.3"  Submitted to github.com/compxco
-c[332]
+c[335] version="cql3d_git_201207.0"
+    Fixed several bugs in ADC** subroutines.
+    Most important - Cannot use 45. in ADCEUND(-ZXN,-45.)
+    The argument should be real*8, ADCEUND(-ZXN,-45.d0).
+    It messed up the results in NERSC(Cray/Intel) runs.
+    Search for YuP[2020-11-15] and YuP[2020-11-16]
+    for other changes.
+    Also adjusted achiefn.f and ainpla.f
+    for calls of some subroutines. See YuP[2020-11-15] in there.
+
+
+c[334] Adjusted plots related to SXR diagnostics.
+    Some of subroutines are used for both NPA and SXR plots,
+    such as subr. tdsxrplt and tdsxrvw. The labels in plots
+    should depend on (softxry.ne."disabled")
+    or (npa_diag.ne."disabled"). Note that softxry and npa_diag
+    may have many values, not just 'enabled'.
+    [2020-11-02]
+
+c[333] Modified iprozeff="curr_fit" procedure, which changes Zeff
+    in such a way as to maintain the target current.
+    Two new namelist variables are added: zrelax (default is 0.5d0)
+    and zrelax_exp (default is 1.d0). The procedure is similar to 
+    that used in efswtch.eq."method4". See cqlinput_help for description.
+    BH,YuP[2020-11-01]
+    
+
+c[332] version="cql3d_git_200101.3"
+
 
 c[332] Added control of printout to the screen, 
     using the namelist variable ioutput(1) [it was present but not used].
@@ -240,7 +267,7 @@ c[310] initialize the two arrays only at 1st iteration,
 c[310] and then reuse them at higher iterations, i.e., it_ampf>1.
 c[310] Note: there is if(ampfmod.eq."enabled" .and. it_ampf.gt.1)return
 c[310] clause in sourceko.f. 
-c[310] So, if we don\'t use a corresponding clause in sourcee.f,
+c[310] So, if we don't use a corresponding clause in sourcee.f,
 c[310] then at it_ampf>1 the arrays source(), xlncur(1,lr_)  
 c[310] will be set to 0.0 but not computed in sourceko.f.
 c[310] YuP[2020-01]
@@ -397,7 +424,7 @@ c[298] See "YuP[2019-10-29]"
 
 c[297] Made adjustments/comments in sub.efield related to efswtch.eq."method4"
 c[297] [basically, we need to use psifct1=1.; needs more checking 
-c[297] for method5]. See YuP[2019-10-29]. 
+c[297] for method5]. See 'YuP[2019-10-29]. 
 
 c[296] Corrected pgplot-related subroutines. Some of them were called 
 c[296] with explicit values, like call GSVP2D(.2,.8,.6,.9).
@@ -436,6 +463,8 @@ c[292] gfortran with compiler setting "-fdefault-real-8", which it is
 c[292] henceforth recommended to be used. Without explicitly typing
 c[292] REAL*4 literal constants used by PGPLOT, default-real-8 would
 c[292] make them REAL*8 constants, and thus not work with PGPLOT subs.
+c[292] fdefault-real-8 does not promote variables with explicit kind 
+c[292] declarations.
 c[292] There is a similar setting for the Intel compiler.
 c[292] With this setting, the compiler:
 c[292] Sets the default REAL type to an 8 byte wide type. Does nothing 
@@ -443,7 +472,8 @@ c[292] if this is already the default. This option also affects the
 c[292] kind of non-double real constants like 1.0, and also does promote 
 c[292] the default width of "DOUBLE PRECISION" to 16 bytes if possible,
 c[292] unless "-fdefault-double-8" is given, too.
-c[292] However, all DOUBLE PRECISION type settings were changed to REAL*8.
+c[292] In any case, for cql3d, all DOUBLE PRECISION type settings 
+c[292] were changed to REAL*8.
 c[292] [BH, 190729].
 c[292] 
 

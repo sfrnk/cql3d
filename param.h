@@ -55,9 +55,10 @@ c..................................................................
 c     PARAMETERS CHOSEN BY USER FOLLOW
 
       character version*64
-      parameter(version="cql3d_git_200101.3")
+      parameter(version="cql3d_git_201207.0")
       character precursr*64
-      parameter(precursr="cql3d_git_190923.3") !=cql3d_git_190309.1 with updates
+      parameter(precursr="cql3d_git_200101.3") !=cql3d_git_200101.3
+                !cql3d_git_190309.1 with updates
       parameter(machinea=2)
 cBH081218:  Present usage, machinea=2 works with 32- and 64-bit machines
       parameter(ngena=4)

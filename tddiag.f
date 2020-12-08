@@ -88,6 +88,8 @@ c.......................................................................
         currpar_starnue_n(lll)= currpar_starnue(lll)
         currpar_starnue0_n(lll)=currpar_starnue0(lll)
         bscurm_n(lll)=bscurm(lll,1,2) !YuP[2019-12-18] saved
+        k=1 !for 1st gen.species (supposed to be electrons; if not - then 0.0)
+        curra_n(lll)=curra(k,lll) !RE current [cgs] !YuP[2020-10-30]
         !bscurm(1:lrz,1,2) is for '1'==electrons, '2'==non-maxwellian
          if (ioutput(1).ge.1) then !YuP[2020] Useful diagnostic printout
          write(*,'(a,3e14.6)')'rya(lll), bscurm_n, dj[A/cm2]',

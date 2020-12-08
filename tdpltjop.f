@@ -621,13 +621,15 @@ c..................................................................
       CALL PGSWIN(RPGmin,RPGmax,RPG1,RPG2)
         CALL PGBOX('BCNST',R40,0,'BCNST',R40,0)
         CALL PGSLS(1) ! 1-> solid
+        CALL PGSCI(1) !black color
         DO I=1,LRZMAX
-           RLRZAP11(I)=sorpwt(i) ! solid: NBI+RF(all gen.species)
+           RLRZAP11(I)=sorpwt(i) ! solid: NBI(or KO)+RF(all gen.species)
         ENDDO
         CALL PGLINE(lrzmax,RLRZAP1(1),RLRZAP11(1))
         CALL PGSLS(2) ! 2-> dashed
+        CALL PGSCI(2) ! red color
         DO I=1,LRZMAX
-           RLRZAP12(I)=sorpw_nbi(kfrsou1,I) ! dashed: NBI only
+           RLRZAP12(I)=sorpw_nbi(kfrsou1,I) ! dashed: NBI(or KO) only
         ENDDO
         CALL PGLINE(lrzmax,RLRZAP1(1),RLRZAP12(1))
       do k=1,ngen ! rf sources for general species
@@ -635,16 +637,19 @@ c..................................................................
             RLRZAP12(I)=sorpw_rf(k,I) 
          ENDDO
          CALL PGSLS(k+2) ! 3-> -.-.- ;   4-> .....
+         CALL PGSCI(4) !blue color: RF
          CALL PGLINE(lrzmax,RLRZAP1(1),RLRZAP12(1))
       enddo ! k=1,ngen
       !
       CALL PGSLS(1) ! solid
+      CALL PGSCI(1) !black color
       CALL PGSLW(LNWIDTH+1) ! bold
       DO I=1,LRZMAX
          RLRZAP13(I)=powrft(i)
       ENDDO
       CALL PGLINE(lrzmax,RLRZAP1(1),RLRZAP13(1)) !solid bold: total rf
       CALL PGSLS(1)
+      CALL PGSCI(1) !black color, restore
       CALL PGSLW(LNWIDTH) !
       CALL PGSAVE
       CALL PGSCH(R41P44)
@@ -688,15 +693,18 @@ c..................................................................
             RLRZAP12(I)=sorpw_rf(k,I) 
          ENDDO
          CALL PGSLS(k+2) ! 3-> -.-.- ;   4-> .....
+         CALL PGSCI(4) !blue color: RF
          CALL PGLINE(lrzmax,RLRZAP1(1),RLRZAP12(1))
       enddo ! k=1,ngen
       !
       CALL PGSLS(1) ! solid
+      CALL PGSCI(4) !!blue color: RF 
       CALL PGSLW(LNWIDTH+1) ! bold
       DO I=1,LRZMAX
          RLRZAP13(I)=powrft(i)
       ENDDO
       CALL PGLINE(lrzmax,RLRZAP1(1),RLRZAP13(1)) !solid bold: total rf
+      CALL PGSCI(1) ! black color restored
       CALL PGSLS(1)
       CALL PGSLW(LNWIDTH) !
       CALL PGSAVE

@@ -368,8 +368,10 @@ c         add a species
             endif
           endif
           if (kelec.gt.kionm(1))  kelec=kelec+1
-          fmass(kionm(nionm))=2.*50.*1.676e-24 !YuP:suggested to use "100*proton" here
-          bnumb(kionm(nionm))=50.
+c201030          fmass(kionm(nionm))=2.*50.*1.676e-24 !YuP:suggested to use "100*proton" here
+c201030          bnumb(kionm(nionm))=50.
+          fmass(kionm(nionm))=2.*100.*1.676e-24 !YuP:suggested to use "200*proton" here
+          bnumb(kionm(nionm))=100.
           kspeci(1,kionm(nionm))="impurity"
           kspeci(2,kionm(nionm))="maxwell"
           if (nbctime.ne.0) then
@@ -876,7 +878,7 @@ CMPIINSERT_ENDIF_RANK
      +   (iprozeff.ne."parabola" .and. iprozeff.ne."prbola-t" 
      &                           .and. iprozeff.ne."curr_fit") )
      +         stop 'inconsistent zeffc(1) and iprozeff'
-               !YuP[2019-10-31] Added iprozeff.ne."curr_fit"
+               !BH,YuP[2019-10-31],[2020-11-01] Added iprozeff.ne."curr_fit"
 
       if (gamaset.eq.zero .and. (ngen.gt.1.or.kelecg.ne.1)) 
      +         stop 'inconsistent gamaset'

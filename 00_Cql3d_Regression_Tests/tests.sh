@@ -40,7 +40,8 @@ cp cqlinput_MAST_test.0 test4/cqlinput
 cp eqdsk_MASTU test4
 cd test4/
 #Next line is assuming genray and cql3d distribution are both under a common
-#directory.
+#directory,
+#and genray test10 has been run and results are in the designated directory".
 ln -s ../../../genray/00_Genray_Regression_Tests/test10/genray.nc genray_test4.nc
 time $XCQL3D > log_test4   #32s on compx2
 cd ..

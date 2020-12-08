@@ -1271,7 +1271,8 @@ c..................................................................
      1  bscurma(2,2),bscurm(0:lrza,2,2),bscurmi(0:lrza,2,2)
      
       real*8 bscurm_n(lrza),reden_n(lrza),energy_n(lrza) !YuP[2019-12-18]
-      common/ar3d/bscurm_n,reden_n,energy_n !YuP[2019-12-18] for save/restore,
+      real*8 curra_n(lrza) !YuP[2020-10-31]
+      common/ar3d/bscurm_n,reden_n,energy_n,curra_n !YuP[2019-12-18] for save/restore,
                           !when making iterations involving jbs current.
       real*8 currpar_starnue(lrza),  sig_starnue(lrza) !YuP[2019-12-19]
       common/ar3d/currpar_starnue,sig_starnue

@@ -4,30 +4,42 @@ C**********************************************
 C    Initializations for atomic data sets
 C**********************************************
 C
-      IMPLICIT REAL*8 (A-H,O-Z)
-      IMPLICIT INTEGER (I-N)
+      !IMPLICIT REAL*8 (A-H,O-Z)
+      !IMPLICIT INTEGER (I-N)
+      implicit none
+      integer i,j,k ! local
 C
+      real*8 APN,AQN,SIGMA,QN,EN,EIN,ENM,FNM,FNN,ENN
+      integer NUCZ, NSPC, NVALNC
       COMMON / ADSDAT / NUCZ, NSPC, APN(100,10), AQN(100,10),
      &                  NVALNC(100), SIGMA(10,10), QN(100,10),
      &                  EN(100,10), EIN(100,5), ENM(100,5,10),
      &                  FNM(100,5,10), FNN(100), ENN(100)
 C
+      real*8 RCLION,RRAREC,RDIREC,CIZLOS,RADRRC,RADDRC,RADCLX,RADBRM
       COMMON / ADELEC / RCLION(100), RRAREC(100), RDIREC(100),
      &                  CIZLOS(100), RADRRC(100), RADDRC(100),
      &                  RADCLX(100), RADBRM(100)
 C
+      real*8 RCXREC,RADBCX
       COMMON / ADNEUT / RCXREC(100), RADBCX(100)
 C
+      real*8 CEAVGZ,CEAVGZ2,CERAD,CELOS,CEFRAC,TOTREC,TOTION,TOTRAD
       COMMON / ADCEQ / CEAVGZ, CEAVGZ2, CERAD, CELOS,
      &                 CEFRAC(100),TOTREC(100),TOTION(100), 
      &                 TOTRAD(100)
 C
+      integer LADEN, LADTIP, LTIPOK, LECI, LECIOK
       COMMON / ADPARM / LADEN, LADTIP, LTIPOK, LECI, LECIOK
 C
+      real*8 CDNN,CDNM,YHNNA,YHNNB,YHNNC,YHNMA,YHNMB,YHNMC
+      integer LDRMLT
       COMMON / ADDIEL / CDNN(100), CDNM(100), 
      &                  YHNNA, YHNNB, YHNNC, YHNMA, YHNMB, YHNMC,
      &                  LDRMLT
 C
+      real*8 ANNEUT, VNEUT
+      integer NCXB, NCXOPT, NCXERR, IVUNIT
       COMMON / ADCXXC / ANNEUT(5), VNEUT(5), 
      &                  NCXB, NCXOPT, NCXERR, IVUNIT
 C
@@ -82,16 +94,19 @@ C
       DO 100 I=1,100
       CDNN(I)=0.
       CDNM(I)=0.
+      NVALNC(I)=0 !YuP[2020-11-16] Fixed BUG
+      FNN(I)=0.0  !YuP[2020-11-16] Fixed BUG
+      ENN(I)=0.0  !YuP[2020-11-16] Fixed BUG
 100   CONTINUE
 C
       DO 101 J=1,10
-      NVALNC(I)=0
-      FNN(I)=0.0 
-      ENN(I)=0.0
+      !NVALNC(I)=0 !YuP[2020-11-16] BUG, Moved to I=1,100 , few lines above
+      !FNN(I)=0.0  !YuP[2020-11-16] BUG, Moved to I=1,100 , few lines above
+      !ENN(I)=0.0  !YuP[2020-11-16] BUG, Moved to I=1,100 , few lines above
       DO 102 I=1,100
         APN(I,J)=0.0
         AQN(I,J)=0.0
-        SIGMA(I,J)=0.0 
+        SIGMA(J,J)=0.0 !YuP[2020-11-16] Fixed BUG. was SIGMA(I,J)
         QN(I,J)=0.0
         EN(I,J)=0.0
  102  CONTINUE
@@ -140,4 +155,4 @@ C
  140  CONTINUE
 C
       RETURN
-      END
+      END SUBROUTINE ADCINIT

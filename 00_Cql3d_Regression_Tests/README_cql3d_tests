@@ -70,7 +70,8 @@ from rst,zst until inside LCFS, as in the prior istep_in_lcfs=1 (the default)
 model. 
 
 The ray data for this run is obtained in the companion 
-git/genray/test10 test run.
+git/genray/test10 test run, which must be run first and the output genray.nc
+file left in its directory.
 
 
 

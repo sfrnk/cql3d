@@ -732,6 +732,9 @@ c..................................................................
       tescal=1.
       tiscal=1.
       zeffscal=1.
+      !Used for iprozeff='curr_fit' only:
+      zrelax=    0.5d0 ![2020-11-01] !For iprozeff='curr_fit' only
+      zrelax_exp=1.d0  ![2020-11-01] !For iprozeff='curr_fit' only
       elecscal=1.
       vphiscal=1.
       bctimescal=1.d0

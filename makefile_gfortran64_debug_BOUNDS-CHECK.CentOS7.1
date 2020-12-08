@@ -1,4 +1,6 @@
 # makefile for CQL3D using gfortran64 on bob8 (Intel core 2)
+# This debug version uses compiler options:
+# CSPECIAL  =  -fdefault-real-8 -fdefault-double-8 -ffpe-trap=invalid,zero,overflow
 
 SHELL     = /bin/sh
 NAME      = xcql3d_gfortran64_debug_BOUNDS-CHECK.1
@@ -105,7 +107,7 @@ OPTIMIZE  = -O
 LISTING   = -Mlist
 #CSPECIAL  = -finit-local-zero #Need gfortran 4.3 for zeroing
 #CSPECIAL  = -Wno-padded
-CSPECIAL  =  -fdefault-real-8 -fdefault-double-8
+CSPECIAL  =  -fdefault-real-8 -fdefault-double-8 -ffpe-trap=invalid,zero,overflow -fbounds-check
 SPECIAL   = -byteswapio -Mbackslash
 #LDSPECIAL = -Wl,-noinhibit-exec -finit-local-zero #Need gfortran 4.3 for zeroing
 LDSPECIAL = -Wl,-noinhibit-exec

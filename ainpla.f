@@ -1931,9 +1931,15 @@ CMPIINSERT_INCLUDE
              !Get neutral density of D0, needed as an input for ADPAK tables, 
              ! where it enters through the ratio nD0/ne.
              rho=rya(lr_)
+             !YuP[2020-11-15] Moved call to get_dens_nD0_ADPAK() outside of if().
+             ! It is not actually specific to ADPAK. 
+             ! It simply sets dens_nD0= dens_nD0_b*exp((rho-1.d0)*radmin/dens_nD0_l)
+             call get_dens_nD0_ADPAK(model_dens_nD0, dens_nD0_b,
+     &            dens_nD0_l, rho, radmin, dens_nD0) !-> dens_nD0
+             ![2020-11-15] This change affects results, but not strongly.
+             ! Before this change the value of dens_nD0 was not defined
+             ! (initialized to a neg. value on PC, or small pos. value on Cray)
              if(adpak.eq.'enabled')then
-               call get_dens_nD0_ADPAK(model_dens_nD0, dens_nD0_b,
-     &            dens_nD0_l, rho, radmin, dens_nD0) 
                call set_get_ADPAK(kopt,imp_type, 
      &            temp_Te,dens_nD0,dens_ne,tau_r,
      &            z1av,z2av) !-> OUT: <Z> and <Z^2> for given imp_type

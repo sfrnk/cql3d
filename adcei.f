@@ -99,6 +99,7 @@ C
 C
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER (I-N)
+CMPIINSERT_INCLUDE     
 C
       COMMON / ADSDAT / NUCZ, NSPC, APN(100,10), AQN(100,10),
      &                  NVALNC(100), SIGMA(10,10), QN(100,10),
@@ -131,8 +132,8 @@ C     CALCULATE ELECTRON COLLISIONAL IONIZATION RATES PER SHELL
 C     AND SUM FOR ALL POPULATED SHELLS. ALSO COMPUTE
 C     IONIZATION ENERGY LOSS RATE CIZLOS.
 C
-      ZISUM = 0.
-      ZESUM = 0.0
+      ZISUM = 0.d0 !0.
+      ZESUM = 0.d0 !0.0
 C
       DO 20 JN = 1 , IVALNC
       ZJN = JN
@@ -144,21 +145,27 @@ C
       ZGAUNT = 12.18 * DEXP(-ZJN / (ZJN+5.)) * (1. + .0335*ZJN)
      &         * (1. - .622/(ZCHG+1.) - .0745/(ZCHG+1.)**2)
      &         * DABS(ZFY)
-      ZITEMP = APN(JQ,JN) * ADCEUND(-ZXN,-45.) *
-     &         (1.-ADCEUND(-ZXN,-45.)) * ZGAUNT / EIN(JQ,JN)**2
+      ZITEMP = APN(JQ,JN) * ADCEUND(-ZXN,-45.d0) *
+     &         (1.-ADCEUND(-ZXN,-45.d0)) * ZGAUNT / EIN(JQ,JN)**2
+      !YuP[2020-11-16] Fixed BUG: Cannot use 45. in ADCEUND(-ZXN,-45.)
+      !The argument should be real*8 !!!
       ZISUM = ZISUM + ZITEMP
       ZESUM = ZESUM + EIN(JQ,JN) * ZITEMP
    20 CONTINUE
 C
       ZISUM = ZISUM * DSQRT(ZTE)
       ZESUM = ZESUM * DSQRT(ZTE)
-      IF(ZISUM .LT. 1.E-26) ZISUM = 0.
-      IF(ZESUM .LT. 1.E-26) ZESUM = 0.0
-      RCLION(JQ) = PNE * 3.44E-11 * ZISUM
-      CIZLOS(JQ) = PNE * ZJLKEV * 3.44E-11 * ZESUM
+      IF(ZISUM .LT. 1.d-26) ZISUM = 0.d0 !0.
+      IF(ZESUM .LT. 1.d-26) ZESUM = 0.d0 !0.0
+      RCLION(JQ) = (PNE*3.44E-11) * ZISUM
+      CIZLOS(JQ) = (PNE*3.44E-11) * ZJLKEV * ZESUM
 C
 C
   100 CONTINUE
+!--CMPIINSERT_IF_RANK_EQ_0      
+!      WRITE(*,*)' ADCXECI: RCLION(1:3)=',RCLION(1:3)
+!      WRITE(*,*)' ADCXECI: PNE,ZISUM=',PNE,ZISUM
+!--CMPIINSERT_ENDIF_RANK
 C
 C
       RCLION(NUCZ + 1) = 0.
@@ -166,7 +173,7 @@ C
 C
 C
       RETURN
-      END
+      END SUBROUTINE ADCXECI
 
 
 

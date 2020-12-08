@@ -8,8 +8,10 @@ C     STORED IN THE APPROPRIATE ARRAYS BY PREVIOUS CALLS
 C     TO ADCSET, ADCERC, AND ADCBCXR.
 C*************************************************************
 C
+
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER (I-N)
+CMPIINSERT_INCLUDE     
 C
       COMMON / ADSDAT / NUCZ, NSPC, APN(100,10), AQN(100,10),
      &                  NVALNC(100), SIGMA(10,10), QN(100,10),
@@ -82,6 +84,9 @@ C
       DO 40 J = 1,II
       JQ = II - J + 1
       CEFRAC(JQ) = CEFRAC(JQ+1) * ZRECT(JQ+1) / ZIONT(JQ)
+!--CMPIINSERT_IF_RANK_EQ_0      
+!      WRITE(*,*)' ADCE: JQ,CEFRAC(JQ)=',JQ,CEFRAC(JQ)
+!--CMPIINSERT_ENDIF_RANK
       IF(CEFRAC(JQ).LT.1.E-10*CEFRAC(ICNTR)) GO TO 42
    40 CONTINUE
 C

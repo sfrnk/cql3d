@@ -699,7 +699,7 @@ c.......................................................................
       nenaa=nena
       if (iplotsxr.eq.'yes')
      +    call tdsxrplt(en_,eflux,nen,nenaa,
-     +            efluxt,nv,inegsxr,softxry,lnwidth)
+     +            efluxt,nv,inegsxr,softxry,npa_diag,lnwidth)
 
 c.......................................................................
 c     Plot SXR view cords in poloidal cross-section, if eqmod="enabled"

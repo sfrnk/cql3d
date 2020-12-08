@@ -247,7 +247,7 @@ c.......................................................................
 
       !YuP[2019-10-29] Added Renormalize currxj(ll) at n=0.
       if(efswtch.eq."method2" .or. efswtch.eq."method4")then
-      if(n.eq.0 .and. totcrt(1).ne.zero)then 
+      if(n.eq.0 .and. totcrt(1).ne.zero)then
          currxjtot=0.d0
          do ll=1,lrzmax
            currxjtot=currxjtot+darea(ll)*currxj(ll)
@@ -269,7 +269,6 @@ c.......................................................................
          !so no harm in that.
       endif ! n=0 !YuP[2019-10-29] done Renormalize currxj at n=0
       endif ! efswtch.eq."method2" .or. efswtch.eq."method4"
-         
 
 c.......................................................................
 
@@ -306,8 +305,8 @@ c.......................................................................
          beamengy=80.   !Assumed beam energy (keV)
 
          tauii(l)=1./(1.4e-7*bnumb(kionn)**2*reden(kelec,l)*zeff(l)*
-     1        gamaset1/(fmu**0.5*sqrt(temp(kionn,l)*1.e3)*
-     1        1.5*temp(kionn,l)*1.e3))
+     1        gamaset1/(fmu**0.5*dsqrt(temp(kionn,l)*1.d3)*
+     1        1.5*temp(kionn,l)*1.d3))
          rhol(l)= vth(kionn,l)/
      1        (bnumb(kionn)*charge*bmod0(l)/(fmass(kionn)*clight))
          rhol_pol(l)=eps(l)**0.5*vth(kionn,l)/
@@ -319,9 +318,9 @@ cBH120519:  Small effect correction, checking with NRL Plasma Formulary
 c         taubi(l)=1./(1.4e-7*bnumb(kionn)**2*reden(kelec,l)*zeff(l)*
 c         taubi is perp collision time of fast ions on ions
          taubi(l)=1./(1.8e-7*bnumb(kionn)**2*reden(kelec,l)*zeff(l)*
-     1        gamaset1/(fmu**0.5*sqrt(beamengy*1.e3)*
-     1        beamengy*1.e3))
-         rhol_b(l)= sqrt(2.*beamengy*ergtkev/fmass(kionn))/
+     1        gamaset1/(fmu**0.5*dsqrt(beamengy*1.d3)*
+     1        beamengy*1.d3))
+         rhol_b(l)= dsqrt(2.*beamengy*ergtkev/fmass(kionn))/
      1        (bnumb(kionn)*charge*bmod0(l)/(fmass(kionn)*clight))
          rhol_pol_b(l)=eps(l)**0.5*
      1        sqrt(2.*beamengy*ergtkev/fmass(kionn))/
@@ -368,23 +367,42 @@ cBH170304     +      (solr(l-1,ll)+solr(l,ll))*(eqbpol(l-1,ll)+eqbpol(l,ll))
      +           0.5*(eqbpol(l-1,ll)+eqbpol(l,ll))
          enddo
 cBH170304         dlpgpsii(ll)=dlpgpsii(ll)/(solr(1,ll)*eqbpol(1,ll))
+CAYP201124 eqbpol and eqdell and dlpgpsii can be zeroes, added logic to avoid
+         if(dabs(eqbpol(1,ll)).lt.1.d-177) then
+         dlpgpsii(ll)=dlpgpsii(ll)/1.d-177
+         else
          dlpgpsii(ll)=dlpgpsii(ll)/eqbpol(1,ll)
+         endif
 
          dlpsii(ll)=zero 
          ! This is the integral over dl_pol*Btor(pol.dist)/B0 
          ! Constant at each ll surface: 
-         btor_r = abs(fpsi(ll)) !This is Btor*R  ! YuP: abs() is ok?
+         btor_r = dabs(fpsi(ll)) !This is Btor*R  ! YuP: abs() is ok?
          do l=2,lorbit(ll)
             lm=l-1
 cYuP            dlpsii(ll)=dlpsii(ll)+(es(l,ll)-es(l-1,ll))*
 cYuP     +           0.5*(bpsi(l-1,ll)+bpsi(l,ll))  !YuP[03-2017] Changed to:
             !YuP: setup the tor field:
+cAYP201124 solr can be zero, added logic to avoid
+            if(dabs(solr(l,ll)).lt.1.d-177) then
+            btor_l= btor_r/1.d-177
+            else
             btor_l=  btor_r/solr(l,ll)  !== fpsiar/R at l
+            endif
+            if(dabs(solr(lm,ll)).lt.1.d-177) then
+            btor_lm= btor_r/1.d-177
+            else
             btor_lm= btor_r/solr(lm,ll) !== fpsiar/R at l-1
+            endif
             dlpsii(ll)= dlpsii(ll) +eqdell(l,ll)*0.5*(btor_lm+btor_l)
             !it uses dl_pol == eqdell(l,ll)
          enddo
+cAYP201124 bmidplne can be zero, added logic to avoid
+         if(dabs(bmidplne(ll)).lt.1.d-177) then
+         dlpsii(ll)= dlpsii(ll)/1.d-177
+         else
          dlpsii(ll)=dlpsii(ll)/bmidplne(ll) ! Divided by B0 (equatorial)
+         endif
 c         write(*,*)'tdrmshst: ll, bmidplne(ll),fpsi(ll)/solr(1,ll)=',
 c     +    ll, bmidplne(ll),fpsi(ll)/solr(1,ll)
 

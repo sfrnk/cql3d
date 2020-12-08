@@ -558,9 +558,13 @@ c     Finish up with zeff and ions if iprozeff.ne."disabled"
             else
                totcurtt=totcrt(nbctime)
             endif
-            ! Find total current from recent FPE solution
-            currxjtot=0.d0
-            bscurr_tot=0.d0
+            ! Find total current from recent FPE solution,
+            ! add delta_sigma*E, add BS, to be compared to 
+            ! total target current, which includes 
+            ! all those types of current intrinsically
+            currxjtot=0.d0  !for total current from FPE [curr() array]
+            bscurr_tot=0.d0 !for total BS current
+            curra_tot=0.d0 !RE current, which may include RF_CD 
             do ll=1,lrzmax
               currxj(ll)=currtp(ll)/3.e9 !A/cm2, <jpar>_FSA, calc in diaggnde
               !YuP[2019-12-27] Also add 
@@ -598,15 +602,56 @@ c     Finish up with zeff and ions if iprozeff.ne."disabled"
 !--CMPIINSERT_IF_RANK_EQ_0
 !--            WRITE(*,*)'profiles: n, Target current totcurtt=',n,totcurtt
 !--CMPIINSERT_ENDIF_RANK
-            
-            if( (n.gt.0).and.(currxjtot.ne.zero) .and. 
-     &          (totcurtt-bscurr_tot.ne.zero) )then 
+            ! At this point, currxjtot includes current from FPE and delta_sigma*E.
+            ! Add BS current, for consistensy with target current totcurtt :
+            currxjtot=currxjtot+bscurr_tot
+            ! So now we can compare currxjtot with totcurtt
+                        
+            if( (n.gt.0) .and. 
+     &          (totcurtt .ne. zero) .and. 
+     &          (currxjtot.ne. zero)        )then 
               !Target current (reduced by bs current)= totcurtt-bscurr_tot
               !YuP[2019-12-27] 
-              !YuP[2020-02-11] Added n>0 condition. At n=0, currtp() is unknown
-              renorm= (totcurtt-bscurr_tot)/currxjtot 
+              !YuP[2020-02-11] Added n>0 condition. At n=0, currtp() is unknown.
+              !
+              !--[early attempt] for renormalization of Zeff:
+![early attempt]  renormz=(currxjtot-bscurr_tot)/(totcurtt-bscurr_tot)
+              !-- works ok when curra() component is <80% of total curr()
+              !-- ( curra_tot < 0.8*currxjtot, approximately).
+              !-- If curra_tot is too large, the procedure becomes unstable:
+              !-- zeff "jumps" between small and large values, 
+              !-- from one time step to another.
+              !-----BH,YuP[2020-11-01] Try something similar to method4 for E-field.
+              !-1- Find the "deviation" of currxjtot from target current totcurtt:
+              djrel= (totcurtt-currxjtot) / 
+     &               max(abs(totcurtt),abs(currxjtot))
+              sign_dj=  sign(one,djrel*currxjtot)
+              if(djrel.eq.0.d0) sign_dj=0.d0
+              !-2- Now setup the relaxation procedure.
+              !zrelax=    0.5d0 !(default value); in namelist
+              !zrelax_exp=1.d0  !(default value); in namelist
+              renormz= (1.d0-zrelax*sign_dj*abs(djrel)**zrelax_exp)
+              !Note: If djrel=0, then renormz=1.
+              !-2a- Make sure that Zeff_new would not over-shoot [2020-11-03]
+              fmaxx=0.d0
+              do k=1,nionm
+                 fmaxx=max(fmaxx,bnumb(kionm(k))) !presently fmaxx=100 [2020-11]
+              enddo
+              if(zeff(1)*renormz.ge.(fmaxx-1.d-6))then
+                 renormz=(fmaxx-1.d-6)/zeff(1) !Assuming flat profile of zeff
+                 ! Then, when adjustment is made below, we will get
+                 !zeff(ll)[new value] = zeff(ll)*renormz= (fmaxx-1.d-6)
+              endif
+              !-2b- Make sure that Zeff_new would not under-shoot [2020-11-03]
+              if(zeff(1)*renormz.le.(1.d0+1.d-3))then
+                 renormz=(1.d0+1.d-3)/zeff(1) !Assuming flat profile of zeff
+                 ! Then, when adjustment is made below, we will get
+                 !zeff(ll)[new value] = zeff(ll)*renormz= (1.d0+1.d-3)
+              endif
+              renorm=1.d0/renormz
+              !-3- Renormalize Zeff :
               do ll=1,lrzmax
-                zeff(ll)=zeff(ll)/renorm ! Note that Ip ~ Te^1.5/Zeff
+                zeff(ll)=zeff(ll)*renormz ! Note that Ip ~ Te^1.5/Zeff
                 zeff(ll)=max(zeff(ll),1.d0) ! Cannot be lower than 1.0
                 currxj(ll)=currxj(ll)*renorm
                 currtp(ll)=currtp(ll)*renorm
@@ -712,9 +757,10 @@ c     Check that range of bnumb for Maxl species brackets zeff
             if(zeff(ll).gt.fmaxx .or. zeff(ll).lt.fminn) then
 CMPIINSERT_IF_RANK_EQ_0
                WRITE(*,*)'profiles.f: ',
-     +              'Adjust bnumb(kion) for compatibility with zeff'
+     +        'Adjust bnumb(kion) for compatibility with zeff=',zeff(ll)
 CMPIINSERT_ENDIF_RANK  
-               stop
+               !stop !YuP[2020-10-30]
+               zeff(ll)=min(zeff(ll),fmaxx) !YuP[2020-10-30] reset to max value
             endif
  121     continue
 

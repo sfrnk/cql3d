@@ -1,4 +1,7 @@
 # makefile for CQL3D using gfortran64 on bob8 (Intel core 2)
+# This makefile uses the following compiler options, which render real*4
+# constants into real*8 form in a predictable, optimal way.
+# CSPECIAL  =  -fdefault-real-8 -fdefault-double-8
 
 SHELL     = /bin/sh
 NAME      = xcql3d_gfortran64.1

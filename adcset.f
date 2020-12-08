@@ -67,6 +67,7 @@ C
 C     SET MAXIMUM SPECIES INDEX NSPC = NUCZ + 1
 C
       NSPC = NUCZ +1
+      !write(*,*)'ADCAPN: NSPC=',NSPC !YuP[2020-11-16]
 C
 C
       DO 1 JQ = 1,NSPC
@@ -173,6 +174,8 @@ C
 C
 C     MAIN SPECIES LOOP
 C
+      !write(*,*)'ADCMORE: NSPC=',NSPC !YuP[2020-11-16]
+
       DO 100 JQ = 1, NSPC
       JJQ = JQ
       IVALNC = NVALNC(JQ)
@@ -309,11 +312,16 @@ C
       DO 10 JN = 1, 10
       ZAPN(JN) = APN(KQ,JN)
    10 CONTINUE
+   
 C
 C     REMOVE ELECTRON FROM SHELL KHOLE
 C
-      IF(KHOLE .GT. 0 .AND. ZAPN(KHOLE) .GT. 0.0)
-     &         ZAPN(KHOLE) = ZAPN(KHOLE) - 1.0
+      IF(KHOLE .GT. 0)then 
+      !YuP[2020-11-16] Fixed BUG: was using ZAPN(KHOLE) when KHOLE=0
+        if(ZAPN(KHOLE) .GT. 0.0)then
+               ZAPN(KHOLE) = ZAPN(KHOLE) - 1.0
+        endif
+      endif
 C
 C     ADD ELECTRON TO SHELL KEXCIT
 C
@@ -360,7 +368,7 @@ C
    60 CONTINUE
 C
       RETURN
-      END
+      END SUBROUTINE ADCSHEN
 
 
 
@@ -447,6 +455,8 @@ C
 C     START MAIN SPECIES LOOP
 C
 C
+      !write(*,*)'ADCMAYR: NSPC=',NSPC !YuP[2020-11-16]
+
       DO 100 JQ = 1 , NSPC
 C
       IVALNC = NVALNC(JQ)
@@ -539,15 +549,15 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER (I-N)
 C
-      ZALPHA = .007298
+      ZALPHA = .007298d0
 C
 C
       ZKN = DBLE(KN)
 C
       ADCPALI = .0136 * ( (PQ / ZKN)**2 ) *
-     &     (1. + ((ZALPHA*PQ)**2) * (0.5 - 1./(4.*ZKN)) / ZKN)
+     &     (1.d0 + ((ZALPHA*PQ)**2) * (0.5d0 - 1.d0/(4.d0*ZKN)) / ZKN)
       !YuP[2019-10-11] corrected bug: ADPALI --> ADCPALI
 C
 C
       RETURN
-      END 
+      END FUNCTION ADCPALI
