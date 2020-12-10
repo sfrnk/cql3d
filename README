@@ -234,3 +234,7 @@ Two new namelist variables are added: zrelax (default is 0.5d0)
 and zrelax_exp (default is 1.d0). The procedure is similar to 
 that used in efswtch.eq."method4". See cqlinput_help for description.
 
+201209
+======
+Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
+the density constant, for the time-indep case, nbctime=0 .

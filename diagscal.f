@@ -16,13 +16,15 @@ CMPIINSERT_INCLUDE
 
       ratio(k,lr_)=1.
 cyup+bh140806: Enable new "consscal" option
-      if (lbdry(k).ne."scale" .and. lbdry(k).ne."consscal") return
+      if (lbdry(k).ne."scale" .and. lbdry(k).ne."consscal" .and.
+     &     lbdry(k).ne."conscalm") return
 
 c..................................................................
 c     Compute the new density..
 c..................................................................
 
-      call dcopy(iyjx2,f(0,0,k,l_),1,temp2(0,0),1) !Copy f(i,j) to temp2 and temp1
+      !Copy f(i,j) to temp2 and temp1
+      call dcopy(iyjx2,f(0,0,k,l_),1,temp2(0,0),1) 
       call dcopy(iyjx2,temp2(0,0),1,temp1(0,0),1)
       call bcast(tam1,zero,jx)
       call bcast(tam4,zero,jx)
@@ -86,6 +88,8 @@ cYuP,BH180918: adding enein_t
      &   .or.
      &     ( (imp_depos_method.ne.'disabled').and.
      &       (k.eq.kelecg .or. k.eq.kelecm)          )
+     &   .or.
+     &     (lbdry(k).eq.'conscalm')
      &                              ) then
          !YuP[2020-06-24] Changed (gamafac.eq."hesslow") to (imp_depos_method.ne.'disabled')
          !   [a more general logic]

@@ -8,6 +8,12 @@ c     This file documents changes in the code
 c
 c***********************************************************************
 
+c[336] Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
+    the density constant, as an alternative to scaling f, for the 
+    time-indep background case, nbctime=0 . Useful, for example, in
+    Dreicer runaway rate calcs. BH[201209]. 
+    
+
 c[335] version="cql3d_git_201207.0"
     Fixed several bugs in ADC** subroutines.
     Most important - Cannot use 45. in ADCEUND(-ZXN,-45.)

@@ -1686,11 +1686,11 @@ c      enddo
       do k=1,ngen
         if (   lbdry(k).ne. "conserv".and. lbdry(k).ne."consscal"
      +   .and. lbdry(k).ne. "fixed"  .and. lbdry(k).ne."scale" 
-     +   ) then
+     +   .and. lbdry(k).ne. "conscalm") then
 CMPIINSERT_IF_RANK_EQ_0
         WRITE(*,*)"lbdry(k)=",lbdry(k)
         WRITE(*,*)"lbdry(k) can only be 'conserv', 'consscal'," // 
-     +  "'fixed', or 'scale'  "
+     +  "'fixed', 'scale' or 'conscalm' "
 CMPIINSERT_ENDIF_RANK
            STOP
         endif
