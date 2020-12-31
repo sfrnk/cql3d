@@ -857,10 +857,12 @@ cBH170630: linearly rescales the distribution to obtain specified density.
          ! In such a case, it is better to use lbdry(k)="conserv"
 	 ! (Then the density of species k will increase.)
       do k=1,ngen
-         if (lbdry(k).eq."scale")  lbdry(k)="consscal"
+         if (lbdry(k).eq."scale")  then
+            lbdry(k)="consscal"
 CMPIINSERT_IF_RANK_EQ_0
-          WRITE(*,404)
+            WRITE(*,404) !YuP[2020-12-22] print only when resetting
 CMPIINSERT_ENDIF_RANK
+         endif
       enddo
  404  format('WARNING:reset (as of 170630) lbdry="scale" to "consscal"')
       if (kelecg.ne.0) then
@@ -929,12 +931,15 @@ CMPIINSERT_IF_RANK_EQ_0
          WRITE(*,207)
 CMPIINSERT_ENDIF_RANK
       endif
- 207  format('WARNING: check jfl too big. Had to reset to jx')
-      if (mod(jfl,2).eq.0) jfl=jfl-1  
-      ! jfl needed to be odd because of jpxyh=(jfl+1)/2 in pltprppr.f
+ 207  format('WARNING: check jfl too big. Had to reset to jx (or jx-1)')
 
 cBH180717:  noticed possible problem in fle, for knockon.eq.enabled:
-      if (knockon.eq."enabled") then
+      if ((knockon.ne."disabled").and.(nonko.le.nstop)) then
+         !YuP[2020-12-22] Changed knockon.eq."enabled" to knockon.ne."disabled"
+         !YuP[2020-12-22] Added (nonko.le.nstop)
+         !In cqlinput, knockon could be set to 'enabled' (or other),
+         !but effectively it is disabled because of large 
+         !value of nonko=10000 (example).
          if (jfl.ne.jx) then
 CMPIINSERT_IF_RANK_EQ_0
             WRITE(*,230)
@@ -943,6 +948,12 @@ CMPIINSERT_ENDIF_RANK
             jfl=jx
          endif
       endif
+      !YuP[2020-12-22] Moved adjustment of jfl to odd value here:
+      if (mod(jfl,2).eq.0) jfl=jfl-1  
+      ! jfl needed to be odd because of jpxyh=(jfl+1)/2 in pltprppr.f
+CMPIINSERT_IF_RANK_EQ_0
+      WRITE(*,*)'ainsetva: jfl=', jfl
+CMPIINSERT_ENDIF_RANK
             
          
 
@@ -1563,21 +1574,18 @@ c.......................................................................
 c     Check on structure of integer*1, if (urfmod.ne."disabled").
 c     The following has been set up for the Absoft fortran
 c     compiler.  Other compilers may be different.
-c     
 c.......................................................................
-
-      if (urfmod.ne."disabled") then
-         ip0=-128
-         ip255=127
-         iu0=ip0+128
-         iu255=ip255+128
-         if (iu0.ne.0 .or. iu255.ne.255) then
-CMPIINSERT_IF_RANK_EQ_0
-            WRITE(*,*) 'ip0,ip255,iu0,iu255 ',ip0,ip255,iu0,iu255
-CMPIINSERT_ENDIF_RANK
-            stop 'check pack unpack in urfpkun.f'
-         endif
-      endif
+!      if (urfmod.ne."disabled") then
+!         ip0=-128
+!         ip255=127
+!         iu0=ip0+128
+!         iu255=ip255+128
+!         if (iu0.ne.0 .or. iu255.ne.255) then
+!            stop 'check pack unpack in urfpkun.f'
+!         endif
+!      endif
+! BH,YuP[2020-12-18] The above few lines are no longer needed: 
+! switched to pack16/unpack16, which uses unteger*2
 	
 
 c.......................................................................

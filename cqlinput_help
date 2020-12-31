@@ -9,7 +9,7 @@
 **  TO RUN CQL3D SET NAMELIST AS DIRECTED BELOW
 **  AND
 **  NAME THIS FILE cqlinput
-**  2011-2-18
+**  [Last update, Dec. 1, 2020, or later.]
 **
 **  Several namelist groups are defined: setup0, setup, sousetup, 
 **                                 rfsetup, trsetup, frsetup,....
@@ -316,7 +316,10 @@
 **
 **  enorm is the energy corresponding to the velocity normalization
 **    constant; if kenorm corresponds to a species index, that
-**    species determines vnorm through enorm, superseding vnorm. (kev)
+**    species determines vnorm through enorm, superseding vnorm. (kev).
+**    For relativistic electrons, E=(gamma-1)*m*c**2=(gamma-1)*511. keV.
+**                                gamma**2=1+(u/c)**2
+**                                u=momentum-per-electron-rest-mass.
 **    default: enorm=200., kenorm=1
 **
 **  tandem="enabled" facilitates the use of both ions and electrons
@@ -612,6 +615,14 @@
 **    appears to be a more clear way of scaling the distribution to maintain 
 **    given density.
 **  lbdry(k)="consscal", then combine above "conserv" and "scale".
+**            For time-dependent background plasma, nbctime.gt.0,
+**            relativistic Maxwellian distributed particles at the 
+**            local temperature are added.
+**            For nbctime=0 case, then the whole f, the distn, is scaled.
+**  lbdry(k)="conscalm", Combine above "conserv" and scale density
+**                       with added (relativistic) Maxwl distrn at namelist
+**                       (relativistic) temperature, including the case
+**                       of nbctime=0.
 **  lbdry(k)="conserv" is the ONLY option for implct="disabled"
 **    default: lbdry()="conserv"  
 **  NOTE:  no "enabled" or "disabled" option for lbdry().
@@ -1167,8 +1178,8 @@
 **    If totcrt(1).ne.0, then these give the current density profile,
 **      normalized to totcrt() total plasma current. 
 **  totcrt(1:nbctime) .ne.0., then total plasma current is specified (amps)
-**    according to a profile given by xjc,xjb,npwrxj,mpwrxj, or xjin_t.
-**  NOTE: if using this option (i.e., xjc(1).ne.0.), need to have 
+**    according to a profile given by xjin_t.
+**  NOTE: if using this option (i.e., xjin_t(1).ne.0.), need to have 
 **        iprocur="spline-t"  (default='disabled').
 **  
 **  
@@ -1424,10 +1435,10 @@
 **   They are set in the same manner as reden is set, by specifying
 **   eparc(0,k) and if lrz.gt.1 eparc(1,k) also.  Similarly, eperc.
 **
-** (2)The torloss(k) series provides a loss term -f/taulos,
+** (2)The torloss(k) series provides a loss term -f/tloss,
 **    treated time-implicitly (for numerical stability).
-**  nonloss, and noffloss give time steps for start and stop
-**      of these loss terms.  (defaults: nonloss=0, noffloss=10000).
+** nonloss, and noffloss give time steps for start and stop
+**    of these loss terms.  (defaults: nonloss=0, noffloss=10000).
 **    torloss(k)="velocity" provides for an additional toroidal loss 
 **    term, and the toroidal loss time will be determined by an 
 **    ad hoc formula determined from input values tauloss(1-3,k):

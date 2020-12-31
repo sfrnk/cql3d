@@ -238,3 +238,15 @@ that used in efswtch.eq."method4". See cqlinput_help for description.
 ======
 Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
 the density constant, for the time-indep case, nbctime=0 .
+Updated git.
+
+
+201230
+======
+Brought git/cql3d directory up to date.
+Commit message:
+Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
+    the density constant, as an alternative to scaling f, for the 
+    time-indep background case, nbctime=0 . Useful, for example, in
+    Dreicer runaway rate calcs.
+See a_change.h for other technical changes.

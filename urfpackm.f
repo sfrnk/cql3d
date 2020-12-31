@@ -1,6 +1,8 @@
 c
 c
-	subroutine pack(ip, nbits, iu, nw)
+	subroutine pack(ip, nbits, iu, nw) !Not used after [2020-12-18]
+! BH,YuP[2020-12-18] This subr. is no longer needed: 
+! switched to pack16/unpack16, which uses unteger*2
 c      
 c       PACK - Compresses stored data
 c       This version prepared for Absoft compiled data
@@ -38,7 +40,9 @@ c           be an integral multiple of 8, for 64-bit words.
 
 c
 c
-	subroutine unpack(ip, nbits, iu, nw)
+	subroutine unpack(ip, nbits, iu, nw) !Not used after [2020-12-19]
+! BH,YuP[2020-12-18] This subr. is no longer needed: 
+! switched to pack16/unpack16, which uses unteger*2
 c       NAME
 c           UNPACK - Compresses stored data
 c      SYNOPSIS

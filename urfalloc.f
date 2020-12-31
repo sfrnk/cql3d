@@ -32,14 +32,6 @@ c.......................................................................
       lnjj=jjx
       nrnrm=nrayelts*nrayn*mrfn
       nrnr2=nrayelts*nrayn*2
-cBH100903:  For machinea=2, have already accounted for bytes/work=4
-cBH100903:  in ipack.   Somehow, parameters worked out such 
-cBH100903:  a problem did not previously show up.
-      ipack= jjx/ibytes*nrayelts*nrayn +1
-      !YuP-101207: no need to multiply by mrfn, 
-      !  because ilowp(ipack,mrfn) and iupp(ipack,mrfn) include mrfn
-
-c     Added 1 to ipack, to ensure sufficient length if ipack is odd.
 
 c     ibytes16 is number of 16-bit words per integer word.
 c     ipack16 is number of integer words required to store 1 set
@@ -51,10 +43,10 @@ c     of ray data (*jjx) in the ifct1_,ifct2_ 16-bit-word arrays.
       nrm=nrayn*mrfn
       
       !if(urfb_version.eq.1)then ! 2 is the new version developed by YuP
-        !subr. pack() is not used by urfb_version.eq.2
-        !so - no need to define pack,pack16 and to print this out.
+        !subr. pack16() is not used by urfb_version.eq.2
+        !so - no need to define pack16 and to print this out.
 CMPIINSERT_IF_RANK_EQ_0
-         WRITE(*,*)'urfalloc: ipack,ipack16,mrfn=',ipack,ipack16,mrfn
+         WRITE(*,*)'urfalloc: ipack16,mrfn=',ipack16,mrfn
 CMPIINSERT_ENDIF_RANK
       !endif
 
@@ -66,7 +58,7 @@ c     lnurfdum is length of urfdum measured in 8 byte words.
 c...................................................................
 
       lnurfdum=4*lniyjx+lniylz+lnyxp2+8*lnj+(3*2+4)*lni+4*lnjj
-     1  +1*nrnr2+(9+3*2+16)*nrnrm+2*ipack+2*ipack16+16*nrm
+     1  +1*nrnr2+(9+3*2+16)*nrnrm+2*ipack16+2*ipack16+16*nrm
 
       czero = (0.0,0.0)
 
@@ -259,12 +251,16 @@ CMPIINSERT_ENDIF_RANK
       !if(urfb_version.eq.1)then ! 2 is the new version developed by YuP
         ! if 1, it will use the original version
         !-YuP 101121:  These are usually large arrays:
-        allocate(ilowp(ipack,mrfn),STAT=istat)
+        allocate(ilowp(ipack16,mrfn),STAT=istat)
+        !BH,YuP[2020-12-18] Changed pack-->pack16(which uses integer*2),
+        !and allocation - accordingly.
         istat_tot=istat_tot+istat
 CMPIINSERT_IF_RANK_EQ_0
         WRITE(*,*)'urfalloc  ilowp: istat=',istat
 CMPIINSERT_ENDIF_RANK
-        allocate(iupp(ipack,mrfn),STAT=istat)
+        allocate(iupp(ipack16,mrfn),STAT=istat)
+        !BH,YuP[2020-12-18] Changed pack-->pack16(which uses integer*2),
+        !and allocation - accordingly.
         istat_tot=istat_tot+istat
 CMPIINSERT_IF_RANK_EQ_0
         WRITE(*,*)'urfalloc   iupp: istat=',istat

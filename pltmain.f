@@ -253,23 +253,24 @@ c---------------------------------------------------------------------
 !      return 
 !      end
 c---------------------------------------------------------------------
-      subroutine gswd2d(scales,xmin,xmax,ymin,ymax) ! NOT USED ANYMORE?
+      subroutine gswd2d(scales,xmin,xmax,ymin,ymax) !xmin,...,ymax are real*8
       ! xmin,... defines the user coordinate system.            
-      implicit integer (i-n), real*8 (a-h,o-z)
+      implicit none !integer (i-n), real*8 (a-h,o-z)
+      real*8 xmin,xmax,ymin,ymax
       REAL*4 PGxmin,PGxmax,PGymin,PGymax, RPG1,RPG2 ! PGPLOT uses REAL*4
-      REAL*4 RBOUND
+      REAL*4 RBOUND ! external function
       REAL*4 :: R40=0.,R41=1.
       character*7 scale,scales ! = "linlin$" or "linlog$","loglin$","loglog$"
       common/GRAFLIB_PGPLOT_scale/ scale
         scale  = scales ! To gpcv2d -> PGLINE
-        PGxmin = RBOUND(xmin)
+        PGxmin = RBOUND(xmin) ! to real*4
         PGxmax = RBOUND(xmax)
         PGymin = RBOUND(ymin)
         PGymax = RBOUND(ymax)
         IF ( PGymax-PGymin .le. 1.e-16 ) THEN ! YuP [02-23-2016]
            PGymax= PGymin+1.e-16
         ENDIF
-        CALL PGSCH(R41) ! set character size; default is 1.              
+        CALL PGSCH(R41) ! set character size; default is 1.
         if(scale.eq."linlin$") then
           CALL PGSWIN(PGxmin,PGxmax,PGymin,PGymax)
           CALL PGBOX('BCNST',R40,0,'BCNST',R40,0)
@@ -281,7 +282,8 @@ c---------------------------------------------------------------------
         !----------------------------
         PGymin= max(PGymin,1.e-32) ! cannot be negative
         PGymax= max(PGymax,1.e-32) ! cannot be negative
-        RPG1= log10(PGymin)
+        RPG1= log10(PGymin) 
+        !do not use alog10 - arg.type dep. on compiler options
         RPG2= log10(PGymax)
         IF ( RPG2-RPG1 .le. 1.e-16 ) THEN ! YuP [02-23-2016]
            RPG2= RPG1+1.e-16
@@ -295,7 +297,8 @@ c---------------------------------------------------------------------
           CALL PGBOX('BCNSTL',R40,0,'BCNSTL',R40,0)
         endif
       return 
-      end
+      end subroutine gswd2d
+      
 c---------------------------------------------------------------------
       subroutine gpcv2d(xarray,yarray,length)   
       ! Plot a line (xarray,yarray) of length n.    

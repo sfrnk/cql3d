@@ -184,18 +184,25 @@ c..................................................................
 c     Unpack stored data - see subroutine urfpack
 c..................................................................
 
-          locatn=(jjx*(is-1)+jjx*nrayelts*(iray-1))/ibytes+1
+          !locatn=(jjx*(is-1)+jjx*nrayelts*(iray-1))/ibytes+1
+              ! BH,YuP[2020-12-18] locatn is no longer needed: 
+              ! switched to pack16/unpack16, which uses unteger*2
           locatn16=(jjx*(is-1)+jjx*nrayelts*(iray-1))/ibytes16+1
           ! locatn16 specifies the storage location 
           ! in the compressed arrays
           !if(urfb_version.eq.1)then ! 2 is the new version developed by YuP
             ! if 1, it will use the original version
-            jjxl=jjx+locatn-1
-            call unpack(ilowp(locatn:jjxl,krf),8,ilim1(1:jjx),jjx)
-            call unpack( iupp(locatn:jjxl,krf),8,ilim2(1:jjx),jjx)
-            jjxl=jjx+locatn16-1
-            call unpack16(ifct1_(locatn16:jjxl,krf),8,ifct1(1:jjx),jjx)
-            call unpack16(ifct2_(locatn16:jjxl,krf),8,ifct2(1:jjx),jjx)
+            call unpack16(ilowp(locatn16,krf),8,ilim1(1:jjx),jjx)
+            call unpack16( iupp(locatn16,krf),8,ilim2(1:jjx),jjx)
+            !BH,YuP[2020-12-18] Changed unpack-->unpack16(which uses integer*2)
+            call unpack16(ifct1_(locatn16,krf),8,ifct1(1:jjx),jjx)
+            call unpack16(ifct2_(locatn16,krf),8,ifct2(1:jjx),jjx)
+                !YuP[2020-12-18] Do not use a range in the above arrays
+                !in the first arguments of unpack16 subroutines!
+                !The 1st argument in subr.unpack is integer*1,
+                !and the 1st arg, in unpack16 is integer*2,
+                ! while ilowp,iupp,ifct1_,ifct2_ are integer*4 by default.
+                !This is done by design of unpack and unpack16 subroutines.
           !endif
 
           prf_rayel=0.d0 !sum-up contribution from a given ray element.

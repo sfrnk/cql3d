@@ -8,6 +8,18 @@ c     This file documents changes in the code
 c
 c***********************************************************************
 
+c[337] For ilowp() and iupp() arrays -
+    changed pack-->pack16(which uses integer*2),
+    also  unpack-->unpack16, 
+    and allocation of those arrays - accordingly. 
+    Also removed a range in indexes in the above arrays
+    when using as the first arguments of unpack16 subroutines.
+    Note: The 1st argument in subr.unpack is integer*1,
+    and the 1st arg, in unpack16 is integer*2,
+    while ilowp,iupp,ifct1_,ifct2_ are integer*4 by default.
+    This is done by design of unpack and unpack16 subroutines.  
+    BH,YuP[2020-12-18]
+
 c[336] Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
     the density constant, as an alternative to scaling f, for the 
     time-indep background case, nbctime=0 . Useful, for example, in
@@ -15,7 +27,7 @@ c[336] Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
     
 
 c[335] version="cql3d_git_201207.0"
-    Fixed several bugs in ADC** subroutines.
+c[335] Fixed several bugs in ADC** subroutines.
     Most important - Cannot use 45. in ADCEUND(-ZXN,-45.)
     The argument should be real*8, ADCEUND(-ZXN,-45.d0).
     It messed up the results in NERSC(Cray/Intel) runs.

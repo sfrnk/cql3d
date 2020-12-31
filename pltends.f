@@ -42,7 +42,7 @@ c...
         CALL PGSVP(R4P2,R4P8,R4P6,R4P9) !(.2,.8,.6,.9) !---> 1st subplot
         CALL PGSCH(R41) ! set character size; default is 1.
         call GSWD2D("linlin$",ptime(1,l_),ptime(nch(l_),l_),emin,
-     1       emax*1.05)
+     1       emax*1.05d0)
         call GPCV2D(ptime(1,l_),pdens(1,k,l_),nch(l_)) ! density(time)
         CALL PGLAB('time (sec)',' ',' ')
         write(t_,10120) k
@@ -58,7 +58,7 @@ c...
         CALL PGSVP(R4P2,R4P8,R4P2,R4P5) !(.2,.8,.2,.5)!----> 2nd subplot
         CALL PGSCH(R41) ! set character size; default is 1.
         call GSWD2D("linlin$",ptime(1,l_),ptime(nch(l_),l_),emin,
-     1       emax*1.05)
+     1       emax*1.05d0)
         call GPCV2D(ptime(1,l_),pengy(1,k,l_),nch(l_)) ! energy(time)
         CALL PGLAB('time (sec)',' ',' ')
         write(t_,10110) k

@@ -27,7 +27,7 @@ c        of the first element in the table that is greater than x.
 c        Elements must be strictly increasing. x.gt.table(n)==>n+1.
 c     lug(x,table,n,iguess) (MATHLIB) same as luf, 
 c        but with guess index iguess.
-c     pack/unpack, as below.
+c     pack16/unpack16, as below.
 c.......................................................................
 
 
@@ -79,13 +79,13 @@ c.......................................................................
 c     The arrays ilim1 and ilim2 defined in this routine will be stored
 c     in packed form in array ilowp and iupp. The number of bits
 c     utilized from each number in ilim1 or ilim2 will be the rightmost
-c     8 bits of each word. The routine pack accomplishes
-c     compression. The variable "locatn" pinpoints the address
+c     16 bits of each word. The routine pack16 accomplishes
+c     compression. The variable "locatn16" pinpoints the address
 c     in the packed array where the first of the jx contributions
 c     from a given ray element will be stored.
 c     jjx is the first multiple of 8 greater than jx .
 c     Similary, ifct1 and ifct2 are stored in packed form in ifct1_
-c     and ifct2_, but in 16 bit (i.e., 2 byte) form. locatn16 specifies
+c     and ifct2_, in 16 bit (i.e., 2 byte) form. locatn16 specifies
 c     the storage location in the compressed arrays.
 c
 c     From man pack on Cray C90 and J90 (after one or more "q"):
@@ -113,7 +113,9 @@ c     subroutines pack/unpack are for 8-bit words, pack16/unpack16
 c     are for 16-bit words.
 c.......................................................................
 
-              locatn=  (jjx*(is-1)+jjx*nrayelts*(iray-1))/ibytes +1
+              !locatn=  (jjx*(is-1)+jjx*nrayelts*(iray-1))/ibytes +1
+              ! BH,YuP[2020-12-18] locatn is no longer needed: 
+              ! switched to pack16/unpack16, which uses unteger*2
               locatn16=(jjx*(is-1)+jjx*nrayelts*(iray-1))/ibytes16 +1
 
 c.......................................................................
@@ -641,14 +643,15 @@ c..................................................................
               endif
 
 c..................................................................
-c     Pack results in 1 byte chunks (ilowp and iupp) and
+c     Pack results in 2 byte chunks (ilowp and iupp) and
 c     2 byte chunks (ifct1_ and ifct2_) to save space.
 c..................................................................
               
               !if(urfb_version.eq.1)then ! 2 is the new version developed by YuP
                 ! if 1, it will use the original version
-                call pack(ilowp(locatn,krf),8,ilim1,jjx)
-                call pack(iupp(locatn,krf),8,ilim2,jjx)
+                call pack16(ilowp(locatn16,krf),8,ilim1,jjx)
+                call pack16( iupp(locatn16,krf),8,ilim2,jjx)
+                !BH,YuP[2020-12-18] Changed pack-->pack16(which uses integer*2)
                 call pack16(ifct1_(locatn16,krf),8,ifct1,jjx)
                 call pack16(ifct2_(locatn16,krf),8,ifct2,jjx)
               !endif

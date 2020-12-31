@@ -346,17 +346,14 @@ c     (1 byte contains 8 bits).
 c     It is used for packing data for urf subroutines.
 c     jjxa is 1st multiple of 8 greater than jxa.
       parameter(ibytes=8/machinea)      
-ccc      parameter(jjxa=((jxa-1)/ibytes)*ibytes+ibytes)
-ccc      parameter(ipacka=jjxa/ibytes*nrayelta*nraya) !moved to urfalloc
 
 c     Set up new dimensioning for ifct1_,ifct2_ (from previous
 c     1 byte per word to 2 bytes per word, improving accuracy.
-c     BH, 050812).
+c     BH, 050812). ![2020-12-18] Also for ilowp and iupp arrays.
 c     ibytes16 is number of 16-bit words per integer word.
-c     ipack16a is number of integer words required to store 1 set
+c     ipack16 is number of integer words required to store 1 set
 c     of ray data (*jjxa) in the ifct1_,ifct2_ 16-bit-word arrays.
       parameter(ibytes16=ibytes/2)
-ccc      parameter(ipack16a=jjxa/ibytes16*nrayelta*nraya)!->to urfalloc
 
 cBH070118      parameter (nrada=129,ninta=8,nint1a=ninta+1)
       parameter (nrada=nnra,ninta=8,nint1a=ninta+1)

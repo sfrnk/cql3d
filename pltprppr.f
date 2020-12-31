@@ -44,9 +44,15 @@ c     (which may conflict with call fle_fsa or fle_pol, below).
         endif
 c       Obtain equatorial plane pitch-avg'd distribution for ko model
 c       case.  (Else setup interfere's with subroutine sourceko).
-        if (knockon.ne."disabled") then
+        if ((knockon.ne."disabled").and.(n.ge.nonko).and.(n.le.noffko)
+     &                                                          ) then
+            !YuP[2020-12-22] Added (n.ge.nonko).and.(n.le.noffko)
+            !In cqlinput, knockon could be set to 'enabled' (or other),
+            !but effectively it is disabled because of large 
+            !value of nonko=10000 (example).
 c           call fle("setup",0)
 c           call fle("calc",1)
+            write(*,*)'pltprppr: Not ready for knockon=enabled'
         elseif (lrz.eq.1) then
            call fle_pol("setup",0)
            call fle_pol("calc",1)
@@ -61,13 +67,13 @@ c     plot (fll(+xpar)-fll(-xpar)), and xpar*(fll(+xpar)-fll(-xpar))
         tem1(1)=0.0
         tem2(1)=0.0
         do 30  jp=1,jpxyhm
-          tem1(jp)=fl(jpxyh+jp-1)-fl(jpxyh-jp)
-          tem2(jp)=xlm(jpxyh+jp-1)*tem1(jp)
+          tem1(jp)=fl(jpxyh+jp-1)-fl(jpxyh-jp)    ! fll(+xpar)-fll(-xpar)
+          tem2(jp)=xlm(jpxyh+jp-1)*tem1(jp) ! xpar*(fll(+xpar)-fll(-xpar))
+!           write(*,'(a,i4,2e11.3)')'lr_, xpar, fll(+xpar)-fll(-xpar)=', 
+!     &          lr_,xlm(jpxyh+jp-1),tem1(jp)
  30     continue
         call aminmx(tem1,1,jpxyhm,1,fmin1,fmax1,kmin,kmax)
         call aminmx(tem2,1,jpxyhm,1,fmin2,fmax2,kmin,kmax)
-c990131        fmin=amin1(fmin1,fmin2)
-c990131        fmax=amax1(fmax1,fmax2)
         fmin=min(fmin1,fmin2)
         fmax=max(fmax1,fmax2)
         
@@ -76,11 +82,12 @@ c990131        fmax=amax1(fmax1,fmax2)
         ! (XLEFT, XRIGHT, YBOT, YTOP)
         CALL PGSCH(R41) ! set character size; default is 1.
         call GSWD2D("linlin$",0.d0,xlu,fmin,fmax)
-        call GPCV2D(xlm(jpxyh),tem1,jpxyhm)
-        call GPCV2D(xlm(jpxyh),tem2,jpxyhm)
+        call GPCV2D(xlm(jpxyh),tem1,jpxyhm) !       fll(+xpar)-fll(-xpar)
+        call GPCV2D(xlm(jpxyh),tem2,jpxyhm) ! xpar*(fll(+xpar)-fll(-xpar))
         
-        write(t_,10011) k
-10011 format("asymmetric cmpt of f_par, and xpar*cmpt, species:",1x,i5)
+        write(t_,10011) lr_,k
+10011 format("asymmetric cmpt of f_par, and xpar*cmpt, lr,species:",
+     &              1x,i3,',',i3)
         RILIN=5.
         CALL PGSCH(R4P8) ! set character size; default is 1.
         CALL PGMTXT('B',RILIN,R40,R40,t_)
@@ -99,9 +106,7 @@ c990131        fmax=amax1(fmax1,fmax2)
         do 10 jj=1,2*jpxyhm
           if (fl(jj) .lt. fmin ) fl(jj)=fmin
  10     continue
-      !-YuP:   call GSVTCL("on$")
         call GPCV2D(xlm,fl,2*jpxyhm)
-      !-YuP:   call GSVTCL("off$")
         
         write(t_,10013) k
 10013 format("parallel distribution function for species:",1x,i5)

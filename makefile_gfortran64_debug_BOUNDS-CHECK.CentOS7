@@ -6,7 +6,11 @@ COMPILER=	gfortran
 BUILDER=	$(COMPILER)
 INCLUDES  = advnce.h comm.h frcomm.h frname.h frname_decl.h name.h  \
 	param.h trans.h wpadvnc.h name_decl.h
-SOURCES  = a_cqlp.f  abchief.f  achief1.f  achiefn.f  aclear.f  ainalloc.f  \
+SOURCES  =	adcaut.f  adcdo.f   adce.f   adcerc.f \
+	adcfnm.f   adcout.f  adcset.f  adctip.f \
+	adcbrm.f   adcdrc.f  adcei.f   adcexc.f \
+	adcinit.f  adcrrc.f  adcstd.f  adcxxs.f \
+	a_cqlp.f  abchief.f  achief1.f  achiefn.f  aclear.f  ainalloc.f  \
 	aindflt.f  aindflt1.f aindfpa.f  aingeom.f  ainitial.f   \
 	ainpla.f  ainplt.f  ainpltpa.f   \
 	ainsetpa.f  ainsetva.f  ainspec.f  ainvnorm.f ampfar.f \
@@ -78,6 +82,11 @@ SOURCES  = a_cqlp.f  abchief.f  achief1.f  achiefn.f  aclear.f  ainalloc.f  \
 	wpinitl.f  wploweq.f  wpsavf.f  wptrafx.f  wptramu.f  \
 	wptrmuy.f  wpvptb.f  wpwrng.f  wpmshchk.f \
 	zblock.f  zcunix.f  zfreya.f    znonsym.f
+#Following inclusion of /ADC routines didn't work [BH191014]
+#	./ADC/adcaut.f  ./ADC/adcdo.f   ./ADC/adce.f   ./ADC/adcerc.f \
+#	./ADC/adcfnm.f   ./ADC/adcout.f  ./ADC/adcset.f  ./ADC/adctip.f \
+#	./ADC/adcbrm.f  ./ADC/adcdrc.f  ./ADC/adcei.f  ./ADC/adcexc.f \
+#	./ADC/adcinit.f  ./ADC/adcrrc.f  ./ADC/adcstd.f  ./ADC/adcxxs.f
 #	zblock.f  zcunix.f  zfreya.f    znonsym.f dgbtrf.f ilaenv.f
 #	zblock.f  zcunix.f  zfreya.F    zgauss.f   znonsym.f 
 #	zblock.f  zcunix.f  zfreya.F    zgauss.f    dropfile.c znonsym.f 

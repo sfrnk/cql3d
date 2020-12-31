@@ -19,7 +19,8 @@ cAYP201124 Replacing	    tam1(j)=-(x(j)-xem1(kk,m,lr_))**2/xem2(kk,m,lr_)
             st1_=xem2(kk,m,lr_)
             if(dabs(st1_).lt.1.d-177) then
              tam1(j)=st2_/1.d-177
-             sovt(j,kk,m,lr)=dexp(tam1(j))
+cBH201217             sovt(j,kk,m,lr)=dexp(tam1(j))
+             sovt(j,kk,m,lr_)=dexp(tam1(j))
             else
              tam1(j)=st2_/st1_
              sovt(j,kk,m,lr_)=dexp(tam1(j))
