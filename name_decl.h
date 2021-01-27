@@ -518,6 +518,23 @@ c      logical
       !YuP[2020-07-02] Added, for usage in ainalloc,tdchief,cfpcoefn
       character*8 cfp_integrals ! "enabled" or "disabled"(by default)
       common /cfp_/ cfp_integrals
+      
+!-----------------------------------------------------------------------    
+!     BH,YuP[2021-01-21] namelist variables to read data files.
+!     (Initial purpose - coupling with NIMROD. 
+!      Can be extended to coupling with other codes.)
+      character*8 read_data ! 'disabled' or 'nimrod', for now.
+      character*128, dimension(101) :: read_data_filenames !list of files
+      ! Max number of files is 101, for now. 
+      ! For coupling with NIMROD, each file contains data at one time slice.
+      ! Therefore, it is recommended to match the max number of files
+      ! with value of nbctimea [set in param.h]
+      real*8 temper_min_data ![keV] Lower limit, to adjust Te and Ti data
+      ! In NIMROD data, Te and Ti may go down to ~0.3eV; not physical.
+      common /read_data_comm/ read_data, read_data_filenames,
+     &  temper_min_data
+!-----------------------------------------------------------------------      
+      
      
 c.......................................................................
 c     Setup block for finite orbit width (FOW) calculations

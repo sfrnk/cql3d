@@ -544,6 +544,146 @@ CMPIINSERT_ENDIF_RANK
            !YuP[2020-04-13] No need to reset: elecfld(1)=elecb(1)
         endif
       endif !  on nbctime.ne.0
+      
+      
+      !-----------------------------------------------------------------   
+      !BH,YuP[2021-01-21] Option to read data files.
+      !(Initial purpose - coupling with NIMROD. 
+      ! Can be extended to coupling with other codes.)
+      if(read_data.eq.'disabled')then
+         continue ! Nothing to check here.
+      elseif(read_data.eq.'nimrod')then !check that files are present
+        ! Note: data files are declared as
+        !character*128, dimension(101) :: read_data_filenames
+        ! Max number of files is 101, for now. 
+        ! For coupling with NIMROD, each file contains data at one time slice.
+        ! Therefore, it is recommended to match the max number of files
+        ! with value of nbctimea [set in param.h]
+        kopt=0 !Below: Only check the presence of files 
+        !and read the size of radial grid [top line in data files]; 
+        n_files=0 ! Counter of files that are found, see below.
+        njene=0 ! To be changed if at least one data file is found.
+        do i=1,size(read_data_filenames)
+          if(read_data_filenames(i).ne."notset")then
+            !Try to read this file:
+            call read_data_files(read_data_filenames(i),i,
+     &                              ipresent,t_data,kopt)
+            if(ipresent.eq.0)then !could not find the file
+CMPIINSERT_IF_RANK_EQ_0
+              WRITE(*,*)
+     &        'read_data_filenames(i)=',TRIM(read_data_filenames(i))
+CMPIINSERT_ENDIF_RANK         
+              STOP 'FILE NOT FOUND'
+            else ! ipresent=1, which means: file is found
+              n_files= n_files+1 ! Counter of data files
+            endif
+          endif
+        enddo ! i
+        if(n_files.eq.0)then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'read_data=',read_data,'  N. of data files=0'
+CMPIINSERT_ENDIF_RANK         
+          STOP 'Set read_data_filenames(i) in cqlinput'
+        endif
+        if(n_files.gt.nbctimea)then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'read_data=',read_data,'  N. of data files=',n_files
+          WRITE(*,*)'STOP: n_files > nbctimea. '
+CMPIINSERT_ENDIF_RANK         
+          STOP 'Increase nbctimea in param.h'
+        endif
+        if(njene.le.1)then ! either no data found, or found data 
+          !with only one radial point (should have at least two?)
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'read_data=',read_data,
+     &    ' Found size of radial grid from data: njene=',njene
+          WRITE(*,*)'STOP: njene is too small'
+CMPIINSERT_ENDIF_RANK         
+          STOP 'Check data in read_data_filenames(i)'
+        endif
+        if(njene.gt.njenea)then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'read_data=',read_data,
+     &    ' Found size of radial grid from data: njene=',njene
+          WRITE(*,*)'STOP: njene > njenea. '
+CMPIINSERT_ENDIF_RANK         
+          STOP 'Increase njenea in param.h'
+        endif
+        !Check that electrons is the general species
+        if (kelecg.eq.0) then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'For read_data=',read_data,
+     &    ' need general species = electrons'
+CMPIINSERT_ENDIF_RANK         
+          STOP 'Need electron general species'
+        endif
+        !Check that there is one maxwellian ion, and it is D+.
+        !NIMROD data has only one "main" ion species, D+.
+        if (nionm.eq.0 .or. nionm.ge.2) then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'For read_data=',read_data,
+     &    ' need one ionic Maxwellian species = D+'
+CMPIINSERT_ENDIF_RANK         
+          STOP 'ainsetva: need one maxwellian ion species' 
+        endif
+        if ((kspeci(1,kionm(1)).ne.'d').and.
+     &      (kspeci(1,kionm(1)).ne.'D')      ) then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'For read_data=',read_data,
+     &    ' need one ionic Maxwellian species = D+'
+CMPIINSERT_ENDIF_RANK         
+          STOP 'ainsetva: need D+ maxwellian species' 
+        endif
+        !If basic tests are passed, reset some of variables:
+        nbctime=n_files ! Reset nbctime to number of data files.
+        !This is only applicable for read_data.eq.'nimrod' case!
+        !The data will be placed into corresponding arrays over ryain grid.
+        !Reset options for profiles:
+        iprone=  "spline-t" !To use enein_t(njenea,ntotala,nbctimea) array
+        iprote=  "spline-t" !To use tein_t(njenea,nbctimea)
+        iproti=  "spline-t" !To use tiin_t(njenea,nbctimea)
+        iproelec="spline-t" !To use elecin_t(njenea,nbctimea)
+        !The arrays are filled-in in subr.tdinitl.
+        !On E field: in NIMROD file, E_data is labeled as "E.B/B",
+        !so it is Eparallel. Reset efflag="parallel" :
+        efflag="parallel"
+        ! zeffin_t() is Not provided by NIMROD, use iprozeff='disabled'. 
+        iprozeff='disabled'
+        !iprocur="spline-t"  !xjin_t() is Not provided by NIMROD
+        !iprovphi="spline-t" !vphiplin_t() is Not provided by NIMROD
+        ! Also reset radcoord:
+        radcoord='rminmax' !In NIMROD data files, the major R grid is given
+        ! [maybe radcoord="polflx" or "sqpolflx" are also ok]
+        imp_depos_method='disabled' !Just in case. Should not be used.
+CMPIINSERT_IF_RANK_EQ_0
+        WRITE(*,*)' ----------------------------------------- '
+        WRITE(*,*)'WARNING: For read_data=',read_data
+        WRITE(*,*)
+     &  ' values of iprone,iprote,iproti,iproelec are reset to spline-t'
+        WRITE(*,*)'  efflag is set to   ',efflag
+        WRITE(*,*)'  iprozeff is set to ',iprozeff
+        WRITE(*,*)'  radcoord is set to ',radcoord
+        WRITE(*,*)
+     &  'WARNING: Be sure imp_type is set to match NIMROD data',imp_type
+        WRITE(*,*)
+     &  'Based on the list of data files [read_data_filenames]:'
+        WRITE(*,*)'     nbctime is set to ',nbctime
+        WRITE(*,*)'     njene is set to   ',njene
+        WRITE(*,*)' ----------------------------------------- '
+        WRITE(*,*)' '
+CMPIINSERT_ENDIF_RANK         
+        !Value of imp_type should match NIMROD data files. Select from:
+        !imp_type: 1->He,2->Be,3->C,4->N,5->Ne,6->Ar,7->Xe,8->W
+      else !No other options, for now, but can be added later.
+CMPIINSERT_IF_RANK_EQ_0
+        WRITE(*,*)'WARNING:  read_data=',read_data
+        WRITE(*,*)'STOP: read_data can only be "disabled" or "nimrod" '
+CMPIINSERT_ENDIF_RANK
+        STOP 'namelist var. read_data  has wrong value'
+      endif  ! read_data.eq.***
+      !-----------------------------------------------------------------    
+
+      
 
 c     Check only tmdmeth='method1', in case of "spline-t" profiles
       if (nbctime.gt.0) then
@@ -577,6 +717,10 @@ c     Rescale bctime, if bctimescal.ne. 1.
             bctime(i)=bctimescal*bctime(i)
          enddo
       endif
+
+
+
+
       
 c.......................................................................
 cl    4. Numerical parameters

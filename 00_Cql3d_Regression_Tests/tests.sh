@@ -34,10 +34,10 @@ ln -s ../rayech_test3 rayech
 time $XCQL3D > log_test3   #6.3s on compx2
 cd ..
 
-#test4: MAST EBW OXB test case.  Ray data in companion genray test.
+#test4: MAST-like EBW OXB test case.  Ray data in companion genray test.
 mkdir test4
-cp cqlinput_MAST_test.0 test4/cqlinput
-cp eqdsk_MASTU test4
+cp cqlinput_MAST-like_test.0 test4/cqlinput
+cp eqdsk_MAST-like test4
 cd test4/
 #Next line is assuming genray and cql3d distribution are both under a common
 #directory,
@@ -53,5 +53,14 @@ cd test5/
 ln -s ../genrayfw_18rays.nc
 ln -s ../g122080.03100
 time $XCQL3D > log_test5   # 33s on compx2
+cd ..
+
+
+#test6  Dreicer Runaway Electron Rate calculation for comparison with
+#       Kulsrud et al, PRL 1973.
+mkdir test6
+cp cqlinput_eoved_.16_multi-flux-surface0.2.11 test6/cqlinput
+cd test6/
+time $XCQL3D > log_test6   # 3.2s on compx2
 cd ..
 

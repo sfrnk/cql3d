@@ -106,7 +106,7 @@ c.......................................................................
          endif
          if (ech.eq."enabled") then
             mrf=mrf+1
-            rftype(mrf)="ech"
+            rftype(mrf)="ec" !YuP[2020-12-22] Was "ech". See cqlinput_help
          endif
          if (fw.eq."enabled") then
             mrf=mrf+1

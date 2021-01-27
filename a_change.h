@@ -8,6 +8,27 @@ c     This file documents changes in the code
 c
 c***********************************************************************
 
+c[339] version="cql3d_git_210125.1"
+c[339] New option for reading data files with plasma profiles
+    computed with other codes;
+    presently setup for coupling with NIMROD only.
+    See the new namelist var. read_data (presently can be 
+    'disabled' or 'nimrod'; other options can be added).
+    Related namelist variables:
+    read_data_filenames() is the list of data files from NIMROD,
+    with FSA values of E field, Te, Ti, density of D+,
+    densities of all ionization states of impurity (e.g., Neon), etc.
+    Also see temper_min_data= Lower limit, to adjust Te and Ti data.
+    Main work is done by new subr. read_data_files().
+    BH,YuP[2021-01-21],[2021-01-22]
+    
+
+c[338] Corrected rftype(mrf)="ech" to "ec" in urfinitl.f
+    and urfsetup.f, to match the logic in urfread.f and cqlinput_help.
+    Also adjusted settings for jfl (should be odd number)
+    in ainsetva, and logic related to fl() array in pltprppr.f.
+    See YuP[2020-12-22]
+
 c[337] For ilowp() and iupp() arrays -
     changed pack-->pack16(which uses integer*2),
     also  unpack-->unpack16, 

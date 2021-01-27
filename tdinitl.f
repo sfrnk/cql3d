@@ -81,13 +81,41 @@ c.......................................................................
       ! If no suitable impurity is present 
       ! (example: imp_type is set to 0 in cqlinput),
       ! then nstates remains 0 ==> Effectively, no impurities.
-      if(imp_depos_method.ne.'disabled')then
+      if( (imp_depos_method.ne.'disabled').or.
+     &    (read_data.eq.'nimrod')              )then  
+          !BH,YuP[2021-01-21] added option when data is obtained from files.
+          !Value of imp_type should match NIMROD data files. Select from:
+          !imp_type: 1->He,2->Be,3->C,4->N,5->Ne,6->Ar,7->Xe,8->W
          call set_impurity_data !-> bnumb_imp(0:nstates),excit_enrgy(0:nstates),etc
          !Some arrays that depend on nstates 
          ! are allocated in subr.set_impurity_data.
          !Other could be allocated in ainalloc, e.g. those that depend on 
          ! combination of nmax+nstates.
       endif
+
+
+      !-----------------------------------------------------------------   
+      !BH,YuP[2021-01-21] Option to read data files.
+      !(Initial purpose - coupling with NIMROD. 
+      ! Can be extended to coupling with other codes.)
+      if(read_data.eq.'nimrod')then
+        kopt=1 ! Setup radial grid ryain() based on R-grid in data files,
+        !also fill-up spline-t arrays like enein_t(), tein_t(), etc.
+        !This part should be called AFTER set_impurity_data, because
+        !we need to know the number nstates for a given impurity type.
+        do jtm=1,nbctime !nbctime was set to number of data files in ainsetva,
+          !which is the number of time slices in case of read_data='nimrod'
+          call read_data_files(read_data_filenames(jtm),jtm,
+     &                            ipresent,t_data,kopt)
+          bctime(jtm)=t_data ![sec], from reading 1st line in data file
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'read_data_filenames=',
+     &     TRIM(read_data_filenames(jtm)),'  bctime[sec]=',bctime(jtm)
+CMPIINSERT_ENDIF_RANK         
+        enddo ! jtm
+      endif
+      !-----------------------------------------------------------------   
+
 
 c.......................................................................
 c     Allocate arrays and radial transport arrays, if required

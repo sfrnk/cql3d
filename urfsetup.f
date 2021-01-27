@@ -39,7 +39,7 @@ c     Count number of wave types, mrf.
          endif
          if (ech.eq."enabled") then
             mrf=mrf+1
-            rftype(mrf)="ech"
+            rftype(mrf)="ec" !YuP[2020-12-22] Was "ech". See cqlinput_help
          endif
          if (fw.eq."enabled") then
             mrf=mrf+1
@@ -212,8 +212,8 @@ c---> They will be needed to read the value of nrayelt(nrayn,mrfn)
 c     Check that allocations were OK 
 c    (should not happen because (nrayn,mrfn)-size is quite small)
       if (istat_tot.ne.0) then
-         write(*,*)'urfsetup.f:  Problem with allocation'
-         write(*,*)'urfsetup.f:  Stopping. istat_tot=', istat_tot
+         WRITE(*,*)'urfsetup.f:  Problem with allocation'
+         WRITE(*,*)'urfsetup.f:  Stopping. istat_tot=', istat_tot
          STOP
       endif
 

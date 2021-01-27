@@ -1931,6 +1931,14 @@ c.......................................................................
       common/impur/fz,dens_imp,temp_imp ! found by ADCDO or ADPAK
       common/hesslow_gscreen/gscreen,hbethe
       common/impurities/dens_imp_allstates(lrza),dMpellet_dvol_sum(lrza)
+      !------------------
+      !BH,YuP[2021-01-21] added a time-dependent variable 
+      !to save data from data files.
+      real*8, dimension(:,:,:),pointer :: dens_imp_t !(0:nstates,1:njene,1:nbctime)
+      common/impur_read_data/dens_imp_t
+      !Only needed when read_data='nimrod'.
+      !Note that dens_imp_t() is not a namelist var, it is just a storage
+      !for density of ionization states at time slices.
 !--------------------------------------------------------------------
       
       

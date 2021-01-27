@@ -296,6 +296,24 @@ c      pi=3.141592653589793d0
       ! and then reuse them by matching a local T
       ! along orbit with the nearest values in the T-grid.
       !-------------------------
+
+      !-----------------------------------------------------------------   
+      !BH,YuP[2021-01-21] namelist variables to read data files.
+      !(Initial purpose - coupling with NIMROD. 
+      ! Can be extended to coupling with other codes.)
+      read_data="disabled" !Other possible values: 'nimrod', for now.
+      ! Set default names for data files. They are declared as
+      !character*128, dimension(101) :: read_data_filenames !list of files
+      ! Max number of files is 101, for now. 
+      ! For coupling with NIMROD, each file contains data at one time slice.
+      ! Therefore, it is recommended to match the max number of files
+      ! with value of nbctimea [set in param.h]
+      do i=1,size(read_data_filenames)
+         read_data_filenames(i)="notset"
+         !write(*,*) TRIM(read_data_filenames(i))
+      enddo
+      temper_min_data=5.d-3 ![keV] Lower limit, to adjust Te and Ti data
+      !-----------------------------------------------------------------    
       
       gsla=270.
       ephicc=0.

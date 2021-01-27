@@ -47,6 +47,35 @@ CMPIINSERT_INCLUDE
       itab(2)=0
       itab(3)=0
 
+c     Densities of Charge states of impurity !YuP[2021-01-22] 
+      !Update  dens_imp(0:nstates,1:lrz) 
+      ! from dens_imp_t(0:nstates,1:njene,1:nbctime)
+      if (read_data.eq.'nimrod') then
+         !Note: In case read_data='nimrod', nbctime>0 is enforced in ainsetva
+         do kstate=0,nstates ! including neutral state (0)
+           if (itme.eq.0) then
+             do l=1,njene
+                tmpt(l)=dens_imp_t(kstate,l,1)
+             enddo
+           elseif (itme.lt.nbctime) then
+             do l=1,njene
+                tmpt(l)= dens_imp_t(kstate,l,itme)
+     +           +(dens_imp_t(kstate,l,itme1)-dens_imp_t(kstate,l,itme))
+     +            /(bctime(itme1)-bctime(itme))*(timet-bctime(itme))
+             enddo
+           else
+             do l=1,njene
+                tmpt(l)= dens_imp_t(kstate,l,nbctime)
+             enddo
+           endif
+           call tdinterp("zero","linear",ryain,tmpt,njene,rya(1),
+     +                   tr(1),lrzmax)
+           do ll=1,lrz
+              dens_imp(kstate,ll)=tr(ll) ! dens_imp is updated
+           enddo ! ll
+         enddo ! kstate
+      endif ! read_data.eq.'nimrod'
+
 
 c     Temperatures
 

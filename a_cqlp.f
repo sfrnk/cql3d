@@ -274,7 +274,7 @@ c      WRITE(*,'(a)') ' a_cqlp: END of CQL3D, just before MPI_FINISH'
 CMPIINSERT_ENDIF_RANK
 
       call it3ddalloc ! Deallocate it3d related storage
-      call de_alloc   ! Deallocate other arrays
+      !YuP[2021] giving problems: call de_alloc   ! Deallocate other arrays
 CMPIINSERT_BARRIER
     
 c     close MPI (print 'MPI Full time =',MPI_WTIME()-mpitime0

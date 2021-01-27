@@ -143,4 +143,215 @@ c..................................................................
       if(idskf.ne."disabled".and.ll.eq.lrors)  close(unit=4)
       if(idskrf.ne."disabled".and.ll.eq.lrors)  close(unit=5)
       return
-      end
+      end subroutine dskout
+
+!=======================================================================
+!=======================================================================
+
+
+      subroutine read_data_files(filenm,jtm,ipresent,t_data,kopt)
+      !YuP[2021-01-21] read data files.
+      !(Initial purpose - coupling with NIMROD. 
+      ! Can be extended to coupling with other codes.)
+      ! For coupling with NIMROD, 
+      ! each file contains data at one time slice.
+      !implicit none
+      implicit integer (i-n), real*8 (a-h,o-z)
+      include 'param.h'
+      include 'comm.h' !contains enein_t(njenea,ntotala,nbctimea),
+               !tein_t(njenea,nbctimea), etc.
+CMPIINSERT_INCLUDE
+
+      !INPUT: filenm, jtm, kopt;  Also nstates (from comm.h)
+      !OUTPUT: ipresent (=1 if the filenm is present, =0 otherwise)
+      !t_data= t[sec], obtained from reading 1st line in given data file.
+      !Other output: the data that is read from file is copied into
+      ! CQL3D arrays like enein_t(), tein_t(), etc.
+  
+      character*128,INTENT(IN) :: filenm
+      integer,INTENT(IN) :: jtm !Index for data file
+      integer,INTENT(IN) :: kopt
+      integer,INTENT(OUT):: ipresent
+      real*8,INTENT(OUT) :: t_data
+      integer kode,istat,iunit ! local
+      integer idum !local
+      real*8 dum1,dum2,dum3 ! local
+      character*8 cdum !local
+      integer njene_data !local
+      integer irow !local
+      character*64 format_data !local, To form a format line
+      ! For reading columns :
+      integer ix_data
+      real*8 r_data,psi_data,b_data,e_data,curr_data,elecd_data
+      real*8 dene_data,denD0_data,deni_data,denz_data
+      real*8 ti_data,te_data
+      real*8,dimension(:),allocatable :: denzz_data ![0:nstates]
+      save denzz_data
+      
+      ipresent=0  !To be changed to 1 if filenm is found
+      t_data=0.d0 !To be found from reading data: time slice [sec]
+      iunit=14
+      open(unit=iunit,file=filenm,status='old',iostat=kode)
+      if (kode.ne.0) then
+CMPIINSERT_IF_RANK_EQ_0
+         WRITE(*,*)'subr.read_data_files:',filenm,' cannot be opened'
+CMPIINSERT_ENDIF_RANK         
+         ipresent=0
+      else
+         ipresent=1
+      endif
+
+ 10   format(i6) ! First number in first line: Radial grid size.
+ 11   format(i6,4x,a6,i6,3x,a6,d12.5) !The whole first line.
+      
+      if(kopt.eq.0  .and. ipresent.eq.1)then
+        !Only check the presence of file; 
+        !Also check the radial grid.  Do not read data yet.
+        read(iunit,10) njene_data
+        njene=njene_data !To be saved into name_decl.h
+        !This value is checked in ainsetva against njenea
+        goto 200 !-> return/exit
+      endif
+      
+      if(kopt.eq.1 .and. ipresent.eq.1)then
+        idum=0
+        cdum='none'
+        dum1=0.d0
+
+        read(iunit,11,iostat=kode) idum,cdum,idum,cdum,dum1
+        if (kode.ne.0) then
+CMPIINSERT_IF_RANK_EQ_0
+          WRITE(*,*)'subr.read_data_files:',TRIM(filenm)
+          WRITE(*,*)'subr.read_data_files: Corrupted 1st line'
+          WRITE(*,*)'time[sec]==dum1=',dum1
+CMPIINSERT_ENDIF_RANK         
+          STOP 'In read_data_files: cannot read 1st line'
+        endif
+        t_data=dum1 !OUTPUT: to be used to fill bctime() array
+        
+        !allocate storage for array to read data
+        if (.NOT. ALLOCATED(denzz_data)) then
+          allocate(denzz_data(0:nstates),STAT=istat)
+          !To read data for impurity, all ionization states,
+          !starting from 0 (neutral)
+        endif
+ 
+        !Allocate time-dependent variable 
+        !It is set as pointer in comm.h, 
+        !and stored in  common/impur_read_data/dens_imp_t
+        !Only needed when read_data='nimrod'.
+        !Note that dens_imp_t() is not a namelist var, it is just a storage
+        !for density of ionization states at each time slice.
+        if(.NOT. ASSOCIATED(dens_imp_t)) then
+          allocate(dens_imp_t(0:nstates,1:njene,1:nbctime),STAT=istat)
+        endif
+    
+        !Form format specs.  ONLY FOR NIMROD data files: 
+        write(cdum,'(i4)') (nstates+1) ! columns corr to 0:nstates
+        format_data='(1x,i4,1x,12d16.9,'//TRIM(cdum)//'(d16.9))' 
+        !write(*,*) 'format_data=',format_data
+        !write(*,*) 't_data[sec]=',t_data
+        
+        ! Read row by row
+        read(iunit,*) !Skip one row (with headings)
+        do irow=1,njene       
+           read(iunit,format_data,iostat=kode) 
+     &         ix_data,
+     &         r_data,psi_data,b_data,e_data,curr_data,elecd_data,
+     &         dene_data,denD0_data,deni_data,denz_data,
+     &         ti_data,te_data,
+     &         (denzz_data(idum),idum=0,nstates) 
+           if (kode.ne.0) then
+CMPIINSERT_IF_RANK_EQ_0
+             WRITE(*,*)'subr.read_data_files: cannot read line=',irow+2
+CMPIINSERT_ENDIF_RANK         
+             STOP 'In read_data_files: cannot read line'
+           endif
+     
+           !1.Verified:  denz_data ~ sum(denzz_data), up to 7-8 digits.
+           ![ denz_data is from the column designated as "nz" ] 
+           !We don't need denz_data by itself, so - no adjustment here.
+           !Also noticed that sometimes denzz_data(idum) have 
+           !small negative values (at initial time slices).
+           !---> Resetting to be not lower than 0.0 :
+           do kstate=0,nstates
+              denzz_data(kstate)= max(denzz_data(kstate),0.d0)
+           enddo
+           !Also, just in case:
+           deni_data= max(deni_data,0.d0) ! For main ion "ni"
+           
+           !2.TEST for quasineutrality.
+           sum_ni_Zi=deni_data !column "ni", which is for the main ion (D+)
+           sum_nimp_zstate=0.d0 !To count electrons from impurity, all Zstates
+           do kstate=1,nstates !These are additional ions from impur.source.
+             sum_nimp_zstate= sum_nimp_zstate
+     &                       +denzz_data(kstate)*bnumb_imp(kstate)
+           enddo ! kstate
+           sum_ni_Zi= sum_ni_Zi +sum_nimp_zstate !total number of free electrons
+           err1= abs(dene_data-sum_ni_Zi)/dene_data !Supposed to be ~0
+!           if(err1.gt.1.d-7)then
+!             write(*,'(a,2e16.9)')
+!     &       '  dene_data,sum_ni_Zi=',dene_data,sum_ni_Zi
+!           endif
+           !RESULTS: At t_data>0, dene_data = sum_ni_Zi up to 7 digit,
+           ! but at t_data=0 [the very 1st data file]
+           ! the value of dene_data [column "ne"] is corrupted - 
+           ! it is set to 0.4e20 at all radial points 
+           ! (supposed to be the edge value only)
+           !---> Resetting ne to have quasineutrality:
+           dene_data= sum_ni_Zi 
+           !END TEST
+           
+           !3. LOWER LIMIT for Te and Ti
+           !Noticed that Te and Ti may go down to ~0.3 eV in data tables.
+           !---> Resetting to be not lower than temper_min_data :
+           te_data= max(te_data,temper_min_data*1d3) 
+           ti_data= max(ti_data,temper_min_data*1d3) 
+           ! ti_data is in eV, while temper_min_data is in keV in cqlinput namelist
+           
+           !--------- Now populate CQL3D arrays
+           if(irow.eq.1) r0_data=r_data !Assuming 1st data point is at magn.axis
+           ryain(irow)= (r_data-r0_data) !Here in [m]
+           !The above definition will be normalized by (r_data_max-r_data_min)
+           ! after all rows are read.
+           
+           tein_t(irow,jtm)= te_data*1.d-3 !converted to keV
+           tiin_t(irow,jtm)= ti_data*1.d-3 !converted to keV
+           !Main Maxwellian species (only one, for now, D+):
+           enein_t(irow,kionm(1),jtm)= deni_data*1.d-6 !converted to cm^-3
+           !Electron species:
+           if(kelecg.ne.0)then !General e species
+           enein_t(irow,kelecg,jtm)= dene_data*1.d-6 !converted to cm^-3
+           endif
+           if(kelecm.ne.0)then !Maxwellian e
+           enein_t(irow,kelecm,jtm)= dene_data*1.d-6 !converted to cm^-3
+           endif
+           
+           !Electric field [V/cm]
+           elecin_t(irow,jtm)= e_data*1.d-2 !converted V/m to V/cm
+           !Note: in NIMROD file, e_data is labeled as "E.B/B",
+           !so - is it parallel? Should we reset efflag="parallel" ?
+           !Also the proper sign is of some concern.
+           !Maybe need to use bsign here? 
+           !write(*,'(a,e12.6)')'elecin_t()=',elecin_t(irow,jtm)
+           
+           !Impurity - densities of each ionization state
+           do kstate=0,nstates
+              dens_imp_t(kstate,irow,jtm)=denzz_data(kstate)*1.d-6 !to cm^-3
+           enddo
+           
+        enddo ! irow
+        
+        ryain(:)= ryain(:)/(r_data-r0_data) !For radcoord='rminmax' only!
+        !assuming last data point is at rho=1 (psi=psilim)
+        !write(*,*)'ryain=',ryain(1:njene) ! checked: [0;1] range
+        !write(*,*)kelecg,kelecm
+        
+      endif ! kopt.eq.1 .and. ipresent.eq.1
+      
+      
+ 200  continue
+      close(iunit)
+
+      return
+      end subroutine read_data_files

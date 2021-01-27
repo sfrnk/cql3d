@@ -250,3 +250,17 @@ Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
     time-indep background case, nbctime=0 . Useful, for example, in
     Dreicer runaway rate calcs.
 See a_change.h for other technical changes.
+
+
+210125
+======
+Brought git/cql3d directory up to date.
+Commit message:
+210125
+======
+version="cql3d_git_210125.1"
+Added new option for reading data files with plasma profiles
+    computed with other codes;
+    presently setup for coupling with NIMROD only.
+See a_change.h for other technical changes.
+
