@@ -304,10 +304,10 @@ CMPIINSERT_ENDIF_RANK
            
            !3. LOWER LIMIT for Te and Ti
            !Noticed that Te and Ti may go down to ~0.3 eV in data tables.
-           !---> Resetting to be not lower than temper_min_data :
-           te_data= max(te_data,temper_min_data*1d3) 
-           ti_data= max(ti_data,temper_min_data*1d3) 
-           ! ti_data is in eV, while temper_min_data is in keV in cqlinput namelist
+           !---> Resetting to be not lower than temp_min_data :
+           te_data= max(te_data,temp_min_data*1d3) 
+           ti_data= max(ti_data,temp_min_data*1d3) 
+           ! ti_data is in eV, while temp_min_data is in keV in cqlinput namelist
            
            !--------- Now populate CQL3D arrays
            if(irow.eq.1) r0_data=r_data !Assuming 1st data point is at magn.axis

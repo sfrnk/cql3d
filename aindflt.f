@@ -312,7 +312,7 @@ c      pi=3.141592653589793d0
          read_data_filenames(i)="notset"
          !write(*,*) TRIM(read_data_filenames(i))
       enddo
-      temper_min_data=5.d-3 ![keV] Lower limit, to adjust Te and Ti data
+      temp_min_data=5.d-3 ![keV] Lower limit, to adjust Te and Ti data
       !-----------------------------------------------------------------    
       
       gsla=270.

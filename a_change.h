@@ -18,7 +18,7 @@ c[339] New option for reading data files with plasma profiles
     read_data_filenames() is the list of data files from NIMROD,
     with FSA values of E field, Te, Ti, density of D+,
     densities of all ionization states of impurity (e.g., Neon), etc.
-    Also see temper_min_data= Lower limit, to adjust Te and Ti data.
+    Also see temp_min_data= Lower limit, to adjust Te and Ti data.
     Main work is done by new subr. read_data_files().
     BH,YuP[2021-01-21],[2021-01-22]
     

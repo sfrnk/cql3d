@@ -252,15 +252,22 @@ Added  lbdry(k)="conscalm" to add Maxwellian particles keeping
 See a_change.h for other technical changes.
 
 
-210125
-======
+210125-6
+========
 Brought git/cql3d directory up to date.
 Commit message:
-210125
-======
+210125-6
+========
 version="cql3d_git_210125.1"
 Added new option for reading data files with plasma profiles
     computed with other codes;
     presently setup for coupling with NIMROD only.
 See a_change.h for other technical changes.
 
+210126
+======
+Simplified new namelist variable temper_min_data to temp_min_data
+git add -n -u
+git add -u
+git commit
+git 

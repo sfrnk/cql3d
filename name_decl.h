@@ -529,10 +529,10 @@ c      logical
       ! For coupling with NIMROD, each file contains data at one time slice.
       ! Therefore, it is recommended to match the max number of files
       ! with value of nbctimea [set in param.h]
-      real*8 temper_min_data ![keV] Lower limit, to adjust Te and Ti data
+      real*8 temp_min_data ![keV] Lower limit, to adjust Te and Ti data
       ! In NIMROD data, Te and Ti may go down to ~0.3eV; not physical.
       common /read_data_comm/ read_data, read_data_filenames,
-     &  temper_min_data
+     &  temp_min_data
 !-----------------------------------------------------------------------      
       
      

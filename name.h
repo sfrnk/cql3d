@@ -83,7 +83,7 @@ c..................................................................
      1  efiter,efflag,curr_edge,efrelax,efrelax1,efrelax_exp,currerr,
      1  bctime,nbctime,
      &  read_data, read_data_filenames, !BH,YuP[2021-01-21] namelist variables to read data files
-     &  temper_min_data, ![keV] Lower limit, to adjust Te and Ti data
+     &  temp_min_data, ![keV] Lower limit, to adjust Te and Ti data
      1  zmax,
      1  fow,outorb,nmu,npfi,nsteps_orb,nptsorb,i_orb_width,
      
