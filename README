@@ -267,7 +267,10 @@ See a_change.h for other technical changes.
 210126
 ======
 Simplified new namelist variable temper_min_data to temp_min_data
+git pull --no-commit    #to make sure up to date before push.
 git add -n -u
-git add -u
+git add -u   # (stages) i.e., adds updated files already in the index
 git commit
-git 
+git push
+
+
