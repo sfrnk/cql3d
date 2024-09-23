@@ -1,0 +1,29 @@
+# .gitignore
+
+# emacs autosaves
+*~
+*#
+
+# preprocessed fortran files
+*_mpitmp.f
+
+# compiled fortran object files
+*.o
+
+# cql3d executables
+xcql3d*
+
+# plots and datafiles
+# Ignore saved plots
+*.png
+*.pdf
+*.eps
+
+# Ignore data files
+*.npy
+*.p
+*.mat
+*.csv
+*.hdf5
+*.h5
+.ipynb*

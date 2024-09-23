@@ -23,16 +23,17 @@ c.......................................................................
       endif
       if (numclas .eq. 1) ilzhfs=lz/2+1
 
-      if (ioutput(1).ge.2) then !YuP[2020] diagnostic printout
-      write(*,*)'tdtry:  ipacktp =',ipacktp
-      endif
+      !if (ioutput(1).ge.2) then !YuP[2020] diagnostic printout
+      !write(*,*)'tdtry:  ipacktp =',ipacktp
+      !endif
+      !write(*,*)'tdtry: lz,lz_bmax(lr_)=',lz,lz_bmax(lr_)
 
       if (cqlpmod .ne."enabled") then
         zsntrp2=1./bbpsi(ilzhfs,lr_)
 cBH070419        ipacktp=3
 cBH070419 NOTE:  ipacktp now set in tdtrmuy, to coordinate with iytr.
 cBH070419        Now can be 0 or 3 here, depending on tfac sign.
-      else
+      else ! (cqlpmod.eq."enabled")
         zsntrp2=psis(l_)/bbpsi(ilzhfs,lr_)
 cBH070419        ipacktp=0
 cBH070419 NOTE:  ipacktp now set in tdtrmuy, to coordinate with iytr.
@@ -50,7 +51,7 @@ c..............................................................
         do 10 i=1,iymax/2
           if (cqlpmod .ne."enabled") then
             sinsq=mun(i)*bmidplne(lr_)/bmidplne(lrzmax)
-          else
+          else ! (cqlpmod.eq."enabled")
             sinsq=mun(i)*psis(l_)
           endif
           if (sinsq.ge.1.) then
@@ -60,13 +61,13 @@ c..............................................................
               it=i-1
               iyh_(l_)=it+ipacktp
               iyh=it+ipacktp
-              go to 11
+              go to 11 !-> exit i loop
             endif
           elseif (sinsq.ge.zsntrp2 .and. mark.eq.0) then
             if (cqlpmod .ne. "enabled") then
               if (sinsq.eq.zsntrp2) call tdwrng(9)
               iu=i-1
-            else
+            else ! (cqlpmod.eq."enabled")
               iu=i-1
             endif
             mark=1
@@ -75,7 +76,7 @@ c..............................................................
           ix=i+iadd
           idx(i,l_)=ix
           y(ix,l_)=asin(sqrt(sinsq))
- 10     continue
+ 10     continue !  i=1,iymax/2
         if (mark.eq.0) call tdwrng(8)
         it=iymax/2-ipacktp
         iyh_(l_)=iymax/2
@@ -84,6 +85,7 @@ c..............................................................
         iyy=2*iyh   !-YuP-101215: Don't use iy=; it's in common /params/
                     ! Don't let overwrite the cqlinput value!
         iy_(l_)=iyy
+        !write(*,*) 'tdtry: iyh,iyy=',iyh,iyy
 cBH070419        if (cqlpmod .ne. "enabled") then
 cBH070419          itl=iu+2
 cBH070419        else
@@ -116,8 +118,8 @@ c..............................................................
         iy_(l_)=iyy
         do 13 i=1,iytr(lrors)/2
           if (mun(i).gt.thb(l_) .and. mark.eq.0) then
-            if (cqlpmod .ne. "enabled") iu=i-1
-            if (cqlpmod .eq. "enabled") iu=i-1
+            if (cqlpmod.ne."enabled") iu=i-1
+            if (cqlpmod.eq."enabled") iu=i-1
             mark=1
             iadd=ipacktp
           endif
@@ -141,9 +143,9 @@ cBH070419        if (cqlpmod .eq. "enabled") itl=iu
         itl_(l_)=itl
         itu=iyy+1-itl
         itu_(l_)=itu
-        if (mark.eq.0) call tdwrng(10)
+        if (mark.eq.0) call tdwrng(10) !iactst=abort forces stop. error>1.e-8
 
-      else if (meshy.eq."free") then
+      elseif(meshy.eq."free")then !Not called with this value; just exit
         return
       endif
 

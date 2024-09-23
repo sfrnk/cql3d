@@ -132,6 +132,7 @@ c$$$     2    "col-mxe--- coulomb coll. with Maxwellian elec.",";",
 c$$$     2    "col-mxi--- coulomb coll. with Maxwellian ions",";",
 c$$$     3    "RF--- radio frequency heating",";",
 c$$$     4    "total--- sum of all power sources ",";",
+c        9     df/dt
 c$$$     5    "fusion--- fusion power output",";",
 c$$$     6    "loss-o--- particle losses due to lossmode(k)",";",
 c$$$     1    "loss-t--- losses due to torloss(k)",";",
@@ -180,7 +181,15 @@ c$$$     1    "los-egy---phenomenological energy loss","$")
         write(t_,222) entr(k,12,l_) !phenomenological energy losses
         RILIN=RILIN+1.
         CALL PGMTXT('B',RILIN,R40,R40,t_)
-
+        
+        if(cqlpmod.eq."enabled")then !YuP[2021-03-03] added for CQLP:
+        write(t_,10032) l_,sz(l_)
+10032   format("Index along B, l=",i4, 4x,  
+     &       "Parallel position s=",1pe14.6,"cm")
+        RILIN=RILIN+1.
+        CALL PGMTXT('B',RILIN,R40,R40,t_)
+        endif
+        
  210    format("Species k=",i2, "    Final powers in Watts/cc are:")
  211    format("sum over all comp=",1pe10.2, 3x,
      +         "From df/dt :",1pe10.2)

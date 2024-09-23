@@ -175,8 +175,8 @@
 **          ="ncdfdist" reads the distribution function from a
 **               netcdf file, 'distrfunc.nc'.  This file can be
 **               the mnemonic.nc file from a previous run.
-**               The text file 'distrfunc' is still needed, but only for
-**               reading namelist from &setup and others (except %setup0),
+**               The text file 'distrfunc' is still needed  (NOT as of 110201), 
+**               but only for reading namelist from &setup and others (except %setup0),
 **               ensuring compatibility of grids, etc.  (Can change
 **               mnemonic in &setup0.)
 **               Reading of text distrfunc for nlrestrt='ncdfdist' or
@@ -305,14 +305,16 @@
 **       boundary.   Thus, the y array is two dimensional, y(pitch,rho).
 **
 **  lz is the number of poloidal (or field line mesh points). Bounce-
-**    averages are computed over this mesh. lz must be .le. lza
-**    (a parameter).
-**    default: lz=lza (lza is a parameter)
+**    averages are computed over this mesh. 
+**    default: lz=40 (If cqlpmod.eq."enabled", lz is set equal to lsmax)
 **
 **  vnorm is the velocity normalization constant (cm/sec).
 **    For relativistic calculations, vnorm is the maximum momentum/unit
 **    rest mass on the mesh.
 **    default: vnorm is set through enorm (below).
+**    Note that in plots, the variable vnorm is printed as "unorm",
+**    to be consistent with meaning of "u" as 
+**    the relativ.moment/rest.mass.
 **
 **  enorm is the energy corresponding to the velocity normalization
 **    constant; if kenorm corresponds to a species index, that
@@ -409,7 +411,7 @@
 **    layer. There is usually no reason to change the default value.
 **    If necessary the program may reset this value at some
 **    flux surfaces.
-**    default: tbnd=.002, tbnd(2:lrorsa)=0.
+**    default: tbnd(1)=.002, tbnd(2:lrorsa)=0.
 **
 **  rfacz is the radial mesh spacing parameter. The minimum value of
 **    the mesh can be pre-specified (see roveram below). Otherwise
@@ -489,7 +491,7 @@
 **  ineg="enabled" means negative values of the distribution function 
 **    are reset to zero after time advancement; ="disabled" 
 **    defeats this option.  But, see update below 03-2011 comment.
-**    default: ineg="enabled"
+**    default: ineg="enabled" [YuP: actually, it is "disabled"]
 **   ="renorm" means if f developes negative values after a time
 **    step, then add 1.1*abs(min(f)) to f, and then multiply by
 **    (old_line_density/new_line_density), to keep total number
@@ -702,7 +704,7 @@
 **    N is chosen so psi(0)=1 and psi'(0)=0 by construction
 **    default: gsla=270. gslb=35.
 **
-**  ephicc is the throat potential jump in Kev for machine="mirror"
+**  ephicc is the throat potential jump in kV for machine="mirror"
 **    This is used to determine the loss cone.
 **    default:ephicc=0.
 **
@@ -1117,12 +1119,12 @@
 **    Applies to all ion temperatures, although coding can be readily
 **    adjusted for individual species if needed.
 **    Can scale profiles with tiscal.
-**  zeffin_t(1:njene,1:nbctime) input as series of Ti profiles (keV).
+**  zeffin_t(1:njene,1:nbctime) input as series of Zeff profiles.
 **     Used if iprozeff.eq."spline-t".
 **  vphiplin_t  (1:njene,1:nbctime) input as series of toroidal
 **     rotation profiles (cm/sec).
 **  elecin_t(1:njene,1:nbctime) input as series of Tor. E-field
-**     profiles (keV) unless current profile control is enabled (volts/cm).
+**     profiles unless current profile control is enabled (volts/cm).
 **     See efswtch="method1".
 **  ennin_t(1:njenea,1:nbctimea,1:npaproca)  input as a series of
 **     neutral density profiles (cm^-3), impurities, etc.
@@ -1807,6 +1809,24 @@
 **  ncont is the number of contours for contour plots
 **    default: ncont=25
 **
+**    Other control of contour plots [see subr.pltcont(k,pltcase,tt_,itype)]
+**    (these are hardwired, for now; see specific calls of pltcont())
+**    Input itype, to identify what is plotted:
+**    ! itype=1 for plots of f(),
+**    !      =2 for df
+**    !      =3 for source
+**    !      =4 for urfb
+**    !      =5 for vlfb
+**    !      =6 for vlhb
+**    !      =7 for rdcb
+**    !      =8 for loss region (from pltlosc)
+**    k is species index.
+**    pltcase=1: geometric progression of plot contours,
+**    pltcase>1: contours equispaced for max at temp(k,lr_).
+**      (pltcase=2 is used for plots of f())
+**    pltcase=0: equispaced, lin.scale from dmin to dmax [2023-03-09]
+**    tt_ is contour plot heading.
+** 
 **  pltvecc="enabled" means vector flux plot for collisions is desired,
 **    ="disabled" - not required. similarly for pltvece(electric field),
 **    pltvecrf(RF field), pltvecal (sum of all fields).
@@ -1819,9 +1839,9 @@
 **      default: veclnth=1.0
 **
 **    ipxy=number of perp velocities, for which vectors plotted.
-**       (default: min(51,iy)).
+**       (default: min(51,iy)).  Can be set lower.
 **    jpxy=number of parallel velocities for which vectors are plotted.
-**       (default: min(101,jx+1)).
+**       (default: min(101,jx+1)).  Can be set lower.
 **
 **
 **  pltend ="enabled" means time plots for density
@@ -2083,6 +2103,49 @@
 **     tavg(1) to tavg(2), etc., if not both zero. [default values: 0.d0]
 **       
 **
+
+**  f3d_out="enabled", then at time step nstop
+**    write 3D distribution, f3d==f(pol.angle,vpar,mu) at fixed rho,
+**    to data file.
+**    Original purpose: To be used by COGENT, as a boundary condition 
+**    at specified rho (flux surface). Work with Ron Cohen, Mikhail Dorf.
+**    See subr. f3dwrite for details [YuP August 2013].
+**    In cqlinput, specify these values:
+**    npol_f3d is poloidal-angle grid size,
+**    nvpar_f3d, nmu_f3d are (vpar,mu) grid sizes
+**    (All grids are equispaced).
+**    f3d_rho is the coupling rho 
+**    (in the same meaning as rovera(), 
+**    and according to definition of radcoord ).
+**    If not specified, the default values are
+**    npol_f3d=20
+**    nvpar_f3d=200
+**    nmu_f3d=100 ! number of grid points in mu=0.5*m*Vperp^2/B
+**    f3d_rho=0.5d0 ! f3d is saved at this rho value
+**    The data is saved into file cql3d_f3d.txt, 
+**    including explanation of units, in the file heading.
+**    It will contain:
+**    f(pol.angle,vpar,mu) at fixed rho==f3d_rho, 
+**    also corresponding grids, and magnetic field B(pol.angle_grid).
+**    Grids and distr.function are expressed  
+**    in mks units and normalized by ref.values.
+**    Example for magnetic field: [Tesla]/units_B
+**    Example for f: [m^-3 (m/s)^-3]/ref_distfunc
+**    Also, additional info is saved into cql3d_cogent_units.txt,
+**    which is useful for setting an input file for COGENT.
+**    It will contain the definition of 
+**    units_B, ref_v, ref_mu, ref_distfunc, etc.
+**    (These normalization units are "hard-wired" in subr.f3dwrite.)
+**    Also, additional data is saved into cql3d_f3d_taub.txt,
+**    which contains tau_bounce [sec] over (ipol,ivpar,imu) grid,
+**    same grid that is used for the f3d distribution.
+**    Default value: f3d_out="disabled"
+
+
+
+
+
+
 ***************************************************************
 **
 **  Calculation and output of first order orbit shift
@@ -2437,7 +2500,22 @@
 **             particle distr. displaced half banana width
 **             inwards (outwards).  (Presently assumes positive plasma
 **             current.  9/93.  Needs more checking out, BH 990928)
+**           See R.W.Harvey and G.Taylor, Electron Bernstein wave-bootstrap
+**           current synergy in the National Spherical Torus Experiment", 
+**           Physics of Plasmasa 12, 052509 (2005)
 **           Only use lrzdiff.eq."disabled" with this option.
+**           [YuP: Just to be clear, "method1" or "method2" produce 
+**            a change in distribution function, so that the bootstrap
+**            current is 'naturally' added into computation of curr() array
+**            through this modification of the distribution function;
+**            See functions bsl() and bsu() for details.
+**            This is different from bootst="enabled" option, see below,
+**            which does not produce a change in distribution function,
+**            but only evaluates the bs current for general and Maxwellian
+**            species based on analytical formulas; 
+**            see subr.tdboothi for details, also arrays bscurm(lrz,ksp,ktype).
+**            These bscurm arrays are saved into mnemonic.nc,
+**            and also plotted in *.ps file (see subr.tdpltmne). 
 **  bootupdt="disabled" (default)
 **          ="enabled" update f_o in bootstrap calculations beyond
 **             initial set-up of the distribution at nonboot.
@@ -2529,7 +2607,10 @@
 **             (n+1).eq.nonvphi or noffvphi.
 **             Thus, presently, if nsou.lt.nstop and n doesn't pass 
 **             through the nonvphi/noffvphi interval, the freya source
-**             will be turned off at n=nsou when the source is reset.
+**             will be turned off at n=nsou+1 when the source is reset.
+**             N.B.[YuP]: So, for NBI to be intact, MUST have nsou>nstop,
+**             otherwise it will be reset to zero at n=nsou+1, 2*nsou+1, ...
+**             in subr. sourcee.
 **    N.B.:  If nonso.ne.0 (or 1), then NEED nso=1, to get proper
 **           turn on (and off, if noffso.lt.nstop).
 **    default: nsou=1
@@ -2540,6 +2621,7 @@
 **  noffso(k,m) is the off cycle for the source [default: 100000].
 **  [Also, appears to be used for parallel transport adjustment:
 **         see tdchief.f, call wptramu/wptrafx, for cqlpmod='enabled']
+**  [YuP/2021: Not anymore, changed to local hard-wired variable n_sub_wp]
 **
 **  For cql3d runs (i.e., lrzmax.ge.4), the following namelist variables
 **    are expanded parabolicly in the radial direction, using
@@ -2556,6 +2638,10 @@
 **
 **  szm2z(k,m,l) is the (z/zmax) width of local source(k,m)
 **    default: szm2z(k,m,0)=szm2z(k,m,1)=.78
+**    Note: for details, see the end of subr.soup.
+**    Peak position and dispersion are set through facz=exp(-(zl-zm1)**2/zm2)
+**    where zl==z(l), zm1=zmax*szm1z, zm2=(zmax*szm2z)^2, 
+**    smaller szm2z means stronger localization around z=zmax*szm1z
 **
 **  soucoord="cart" means cartesian coordinates are used
 **    for input; soucoord="polar" is the other option (see below)
@@ -2591,12 +2677,15 @@
 **    default: asorz(k,m,0)=asorz(k,m,1)=0.
 **    Alternatively, if asorz(k,m,0)=-1., then input the source profile as 
 **       asorz(k,m,1:lrzmax)
+**    Note: In the above arrays, suffix 'z' is important.
+**          See subr. tdstin which makes a copy of sellm1z() to sellm1(),
+**          and other arrays with 'z' suffix.
 **
 **  pltso="enabled" means plot contours of the source.
-**    ="first" plot coutours only if n=nonso(1,1).
+**    ="first" plot contours only if n=nonso(1,1).
 **    Also, options to plot with colors are added [2018-02-07]
 **    ="color" means plot contours of the source in color,
-**    ="first_cl" plot coutours in color only if n=nonso(1,1).
+**    ="first_cl" plot contours in color only if n=nonso(1,1).
 **    Also plot source integrated over theta, in manner of pltfofv (above)
 **    default: pltso="first"
 **
@@ -2881,10 +2970,10 @@
 **                    psigrid="disabled", or reset nconteqn=0
 **                    in cqlinput.]
 **
-**  lfield should be .le. lfielda and is the number of poloidal
+**  lfield  is the number of poloidal
 **    points at which the O.D.E. integrator returns values for
 **    R(s) and Z(s), where s parameterizes the contour.
-**    default: lfield=lfielda  and lfielda should be around 250.
+**    default: lfield=250 (note: lfielda is not used anymore).
 **
 **   END "EQ" MODULE INPUT
 **
@@ -3518,6 +3607,10 @@
 **        ="disabled" excludes transport
 **          default: "disabled"
 **
+**  nontran:  time-step at which transport is turned on (default=0)
+**  nofftran: time-step at which transport is turned off(default=10000)
+**
+**
 **  adimeth="disabled", with soln_method='direct', 
 **           then use splitting scheme (default).
 **         ="enabled", the use ADI method.
@@ -3741,6 +3834,23 @@
 **                     mu.  (Most appropriate for transport due to
 **                     low freq. perturbations).}
 ** 
+**  PLOTTING OPTIONS FOR RADIAL TRANSP
+**
+**  pltdrr="enabled" means plot contours of Drr == d_rr(i,j,k,lr)
+**      in momentum 2D space (v_par,v_perp) [normalized by vnorm or c]
+**      at time steps selected by nplot=*,
+**      and such that n.ge.nontran .and. n.le.nofftran
+**    ="first" plot contours (black lines), only if n=nontran
+**      (or first time the subr.pltmain is called at n.ge.nontran)
+**    Also, options to plot with colors :
+**    ="color" means plot contours of the Drr in color,
+**      at time steps selected by nplot=*,
+**      and such that n.ge.nontran .and. n.le.nofftran
+**    ="first_cl" plot contours in color, only if n=nontran
+**      (or first time the subr.pltmain is called at n.ge.nontran)
+**    default: pltdrr="first"            Added: YuP[2021-08]
+**         
+**
 **************************************************************
 **
 **  BEGIN "FR" MODULE INPUT
@@ -3770,14 +3880,33 @@
 **
 **  frmod           ="enabled" enables the NFREYA NB deposition.
 **                      default:frmod="disabled"
-**                  MUST also set nso=1, nonso(kfrsou,1),
-**                    noffso(kfrsou,1) in the above sousetup namelist.
-**                    (kfrsou, below,  is set in setup namelist.)
+**                  MUST also set 
+**                   nso=max number of source per species, as above,
+**                   nonso(kfrsou(1:nbeams),1:nbeams),
+**                   noffso(kfrsou(1:nbeams),1:nbeams) in the above 
+**                   sousetup namelist.
+**                   (kfrsou(1:nbeams), below,  is set in setup namelist.)
+**             N.B.[YuP]: For NBI to be intact, also MUST have nsou>nstop,
+**             otherwise it will be reset to zero at n=nsou+1, 2*nsou+1, ...
+**             in subr. sourcee.
 **
-**  kfrsou [in namelist setup] = general specie which NBI source
-**                               is applied to. Default=0, so must
-**                               set it in the namelist.        
+**  nbeams          nbeams is the number of beams, indexed by ib, below.
+**                  (max=kb=16). Used to set mb=nbeams within freya.f.
 **
+**  kfrsou(1:nbeams) [in namelist setup] = general specie index to which 
+**                               the ib'th NBI source is applied to. 
+**                               Default kfrsou(1:kb)=0, Maximum kb=16
+**                               set in param.h. The number of distinct
+                                 beams species must be .le. ngen.      
+**                               The number of non-zero entries should be
+**                               consistent with nbeams.
+**                               Also, gives the species of the NB.
+**                               Order kfrsou() so that beams of the
+**                               same species are contigous 
+**                               (beamlines involving the same species
+**                               are assumed grouped together in kfrsou())
+**                               Prior to 20171016, only one beam species
+**                               could be specified, and kfrsou was a scalar.
 **  frplt           ="enabled" allows a plot of a selected number of
 **                    birth points on a cross-sectional tokamak 
 **                    background.
@@ -3813,13 +3942,31 @@
 **  bmsprd          This standard deviation (see above) is normalized to
 **                    to the minor radius, radmin. A typical choice 
 **                    would be .1  [BH081204: Vestegial, as has no effect.]
-**  kfrsou          (in namelist setup) is the species number of 
+**  kfrsou(1:nbeams)  (in namelist setup) is the gen species number of 
 **                  the beam ions
 **
 **  nimp            nimp is the number of impurity species.
-**  nprim           nprim is the number of primary species.
-**  nbeams          nbeams is the number of beams, indexed by ib, below.
-**                  (max=kb=8). Set to mb within freya.f
+**                  (Only 0 or 1 is allowed, for now; see frinitz.f and frstup.f).
+**                  YuP[2023] Revised version in subr.frstup to ID the impurity ion:
+**                  Scan the Maxwellian_ion list, 
+**                  skip those ions that are present among general_ion list
+**                  (it happens in colmodl=3 runs), 
+**                  take the first ion in the remaining list as the impurity ion.
+**                  See subr.frstup for details.
+**                  In screen/log file, verify this printout:
+**                  'frstup: Impurity species index k=kimp_='
+**                  where kimp_ points to the species index in cqlinput list.
+**                  If no impurity (nimp=0), kimp_ is 0.
+**
+**  nprim           nprim is the number of primary species.  
+**                  Apparently must be .ge.(number of beam species).
+**                     (See frinitz.f, re ibion(). BH170807)
+**                  YuP: In cqlinput, position those nprim ions in the beginning of list.
+**                  E.g., if D and T beams are used, position D and T species
+**                  in the beginning of general_species list, and use nprim=2.
+**                  (Note that ngen can be larger than 2 in this example,
+**                  if electrons are general species, too).
+**
 **  anglev(ib)      Vertical angle (degrees) between optical axis
 **                    and horizontal plane; a positive value indicates
 **                    particles move upward
@@ -3923,17 +4070,19 @@
 **                  fe_tk=factor (>1) to set upper limit of energy in 
 **                     n*sigma array.  max(ebins) = max(ebkev)*fe_tk.
 **                     Required for nonzero rotation cases.
+**                     Default: fe_tk=0.d0
 **                  ne_tk= number of equi-width energy bins used in forming
-**                     n*sigmaarray.  required for nonzero rotation cases. Is
+**                     n*sigma array.  required for nonzero rotation cases. Is
 **                     internally reset to zero (used as flag to turn off 
 **                     rotational effects on neutral stopping) if angular 
 **                     rotation is not present (iangrot = 0).
 **                  ds_tk= maximum trajectory increment (cm) used in subroutine
-**                     INJECT to calculate psi(s), where s is the neutral 
+**                     INJECT1 to calculate psi(s), where s is the neutral 
 **                     trajectory pathlength from the first closed flux surface
 **                     it encounters.  Used for non-zero toroidal rotation,
 **                     where mean free path as a function of path length
 **                     is required.
+**                     Default: ds_tk=0.d0
 **  inubpat          switch controlling 2-d beam deposition calculation
 **                   0, (default) bypass 2-d deposition
 **                   MUST BE = 0 FOR CQL RUNS
@@ -3956,7 +4105,8 @@
 **    and beampon gives the on-time interval during the pulse cycle,
 **    beampoff gives the off-time interval during the pulse cycle.
 **    If beamplse.eq."tauee", these times are measured in units
-**    of tauee, else in terms of seconds.
+**    of tauee, else in terms of seconds.  Presently only set up for
+**    one beam line (the first).
 **  That is,
 **  beampon  is the on time during each cycle.
 **  beampoff is the off time during each cycle.
@@ -4001,7 +4151,56 @@
 **          default = "disabled".  
 ** 
 **
- 
+**      
+**
+** ---------------------------------------------------------------------
+**   HOW TO UPDATE NBI/FREYA DEPOSITION AT EVERY TIME STEP
+** ---------------------------------------------------------------------
+** If plasma density and/or temperature change significantly,
+** the NBI deposition should be updated.
+** As of [2022-12] the procedure is developed as follows.
+** Use the logic related to plasma rotation, but without toroidal speed,
+** i.e., set (in &setup section of cqlinput):
+**   nonvphi=2 (example)  and  noffvphi=10000 (example)
+** The FREYA module will be called for time steps n according to 
+**   if( (n+1).ge.nonvphi .and. (n+1).lt.noffvphi )then...
+** See tdchief.f, line ~165. Note that in this logic condition
+** the time step counter n starts with n=0.
+** Leave default values of vphic()=0 and iprovphi="disabled",
+** which means - no toroidal rotation of plasma in this case
+** (if rotation is really needed, then - set those values).
+
+
+** Description of nprim,nimp as in ONETWO TRANSPORT code, from which
+** freya subroutines were originally extracted
+** From onetwo, Version 3.0: cray102.f, Obtained from GA:onetwo_cvs_070823_genr
+c ----------------------------------------------------------------------       @
+c --- ION PARAMETERS                                                           @
+c ----------------------------------------------------------------------       @
+c% nprim       Number of      primary ion species (1 to 3)                     @
+c% nimp        Number of     impurity ion species (0 to 2)                     @
+c% namep(i)    Name   of ith  primary ion species                              @
+c              'h' , protons                                                   @
+c              'd' , deuterons                                                 @
+c              't' , tritons                                                   @
+c              'dt', mixture of d and t                                        @
+c              'he', thermal alphas                                            @
+c% namei(i)    Name   of ith impurity ion species                              @
+c              'he', helium                                                    @
+c              'c' , carbon                                                    @
+c              'o' , oxygen                                                    @
+c              'si', silicon                                                   @
+c              'ar', argon                                                     @
+c              'ti', titanium                                                  @
+c              'cr', chromium                                                  @
+c              'fe', iron                                                      @
+c              'ni', nickel                                                    @
+c              'kr', krypton                                                   @
+c              'mo', molybdenum                                                @
+c              'w' , tungsten                                                  @
+c% fd          Number fraction of deuterons in d-t mixture                     @
+c ----------------------------------------------------------------------       @
+  
 
 
 ***************************************************************
@@ -4049,7 +4248,7 @@
 **    tfac:     same as before, except add the option for tfac<0, with meshy="fixed_mu"
 **    epsthet:  which constructs the theta mesh such that at each s position, we
 **              have: y(iyh_(l),l)=pi/2-epsthet. Then distributes the rest of the
-**              points.
+**              points. Default is epsthet=0.1
 **    
 **    ngauss,nlagran:
 **              Determines how the integral over theta for computing the Legendre
@@ -4073,12 +4272,13 @@
 **
 **     0. The parameter nummods determines the numerical model used to solve
 **        the equation along s. nummods is divided into classes of multiple
-**        of 10: numclas=nummods/10 => [0,9]; [10,19]; [20,29] ...
+**        of 10: numclas=nummods/10 =>   nummods=[0,9]; [10,19]; [20,29] ...
 **        numclas = 0: normal case
 **                  1: assumes up/down symmetric case and periodic condition
 **                     but compute equil. parameters on top half cross-section
 **                     on ls/2+1 points and then copy the rest in sub. wploweq
 **                     Otherwise, same as numclas=0 with sbdry="periodic"
+**                  [YuP: it seems numclas>1 is not applicable in the code]
 **        In each class, nummods is divided into two groups:
 **           mod(nummods,10) < 5: 2-D FP velocity equ. solved on nodal s points
 **                           > 4: velocity eq. solved at s+1/2
@@ -4090,6 +4290,20 @@
 **                         4: " centered diff. + bound. cond. at l=1
 **        Note: if sbdry="periodic" there might not be any extra boundary
 **              conditions imposed (see wpbdry)
+**        Default is nummods=1. Recommended 13 or 14, see comments by YuP below.
+**        [YuP: From tests, nummods=10 gives exactly same results as nummods=11]
+**        [YuP: For advection-dominated cases (low-collis; starnue<0.1) nummods=11,12,13
+**         are the best options, but for higher collisionality (starnue>0.1),
+**         those options give non-conservation of density and energy,
+**         and visible dip or peak defect in distr. func. at v~0; 
+**         so, for starnue>0.1, nummods=14 is best.]
+**        [YuP: From theory of ADI methods,
+**         the upwind differencing, in the direction of advection term,
+**         helps to reduce odd-even (in s) oscillations, common for ADI when
+**         advection term dominates over diffusion (collision) term.
+**         For centered differencing (i.e. nummods=14),
+**         in case of advection-dominated FPE, the refined s-grid 
+**         helps to reduce odd-even oscillations; i.e., increase ls.] 
 **              
 **    lmidvel:  =0 (default) assumes velocity source term computed at s-nodes
 **              =1 assumes velsou(l)=source term at l+1/2
@@ -4124,8 +4338,9 @@
 **    nofftran: time-step at which transport is turned off(default=10000)
 **
 **    relaxtsp: ="enabled" define f_n+1 = 0.5*(f_n+1/2 + f_n+1) for
-**              n in [nonavgf,nofavgf]
-**              ="disabled" keeps f_n+1 as determnined after s-step
+**                n in [nonavgf,nofavgf] 
+**              ="disabled" keeps f_n+1 as determined after s-step
+**                [YuP: "enabled" shows good stability]
 **
 **    nonelpr,noffelpr: time-steps in between which the parallel electric 
 **                      field due to Poisson eq. is calculated.

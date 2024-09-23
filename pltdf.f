@@ -58,7 +58,7 @@ c..................................................................
         ! Additionally, plot f(n+1)-f(n)
         if (pltd.eq."df" .or. pltd.eq."df_color")then
         
-        do 20 i=1,iy
+        do 20 i=1,iy_(l_)  !YuP[2021-03-11] iy-->iy_(l_)
           do 21 j=1,jx
             temp1(i,j)=f(i,j,k,l_)-f_(i,j,k,l_)
  21       continue

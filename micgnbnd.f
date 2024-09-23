@@ -72,7 +72,7 @@ c............................................................
       lmax(itu,lr_)=ilzhfs
       tau(itl,lr_)=xu
       tau(itu,lr_)=xu
-      do 40 i=1,iy
+      do 40 i=1,iy_(l_)  !YuP[2021-03-11] iy-->iy_(l_)
         vptb(i,lr_)=abs(coss(i,l_))*tau(i,lr_)
  40   continue
       return

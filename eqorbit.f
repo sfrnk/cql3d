@@ -6,7 +6,8 @@ c
       include 'param.h'
       include 'comm.h'
 
-      dimension slrz(2),rwork(80),iwork(30),epsierr(lfielda)
+      dimension slrz(2),rwork(80),iwork(30)
+      !real*8 epsierr(lfield) !Not used
       
       !YuP[2020-06-30] Added kopt=2, which allows tracing surface
       ! directly from point (rstart,zstart) when it is given in INPUT
